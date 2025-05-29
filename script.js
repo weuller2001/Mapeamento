@@ -51,14 +51,14 @@ document.addEventListener('DOMContentLoaded', function() {
     fillElement('funcionariosEmpresaTotal', 'funcionariosEmpresaTotal');
     fillElement('mediaXMLmensal', 'mediaXMLmensal');
 	fillElement('mediaXMLmensalVarejista', 'mediaXMLmensalVarejista');
-    fillElement('sqlMaiorBancoBaseMB', 'sqlMaiorBancoBaseMB', ' MB');
-    fillElement('sqlTotalBancoBaseMB', 'sqlTotalBancoBaseMB', ' MB');
+    fillElement('sqlMaiorBancoBaseMB', 'sqlMaiorBancoBaseMB', ' GB');
+    fillElement('sqlTotalBancoBaseMB', 'sqlTotalBancoBaseMB', ' GB');
     fillElement('windowsVersion', 'windowsVersion');
     fillElement('sqlVersion', 'sqlVersion');
     fillElement('processorName', 'processorName');
     fillElement('coreCount', 'coreCount');
     fillElement('totalRamGB', 'totalRamGB', ' GB');
-    fillElement('sqlRamMB', 'sqlRamMB', ' MB');
+    fillElement('sqlRamMB', 'sqlRamMB', ' GB');
     fillElement('connectionType', 'connectionType');
     fillElement('diskReadSpeedMBps', 'diskReadSpeedMBps', ' MB/s');
     fillElement('diskWriteSpeedMBps', 'diskWriteSpeedMBps', ' MB/s');
