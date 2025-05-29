@@ -1,7 +1,7 @@
 // script.js
 
 document.addEventListener('DOMContentLoaded', function() {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(window.location.search); // Lê os parâmetros da URL
     const resultsContent = document.getElementById('resultsContent');
     const loadingMessage = document.getElementById('loadingMessage');
     const downloadReportBtn = document.getElementById('downloadReportBtn');
@@ -10,31 +10,35 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Função auxiliar para preencher um elemento com dados da URL
     function fillElement(id, paramName, suffix = '') {
-        const element = document.getElementById(id);
         let value = params.get(paramName); // Pega o valor do parâmetro da URL
         
-        // CORREÇÃO: Substituir '+' por espaço e tratar vírgulas para números
-        if (value !== null) {
-            value = value.replace(/\+/g, ' '); // Substitui TODOS os '+' por espaços
+        if (value !== null) { // Se o parâmetro existe na URL
+            // PASSO CRUCIAL:
+            // 1. Substituir '+' por espaço (alguns navegadores fazem isso, outros não para URLSearchParams.get())
+            // 2. Decodificar quaisquer caracteres percent-encoded (%XX) como %c3%87 ou %40
+            value = decodeURIComponent(value.replace(/\+/g, ' '));
             
             // Tratamento para números com vírgula como separador decimal (cultura brasileira)
             let displayValue = value;
             if (id.includes('MB') || id.includes('GB') || id.includes('Mbps') || id.includes('cpuMultiCoreScore')) {
-                displayValue = value.replace(',', '.'); // Substitui vírgula por ponto para exibição/parsing JS
-                // Se precisar do valor como número para cálculos, faça parseFloat(displayValue) aqui
-                // Ex: data[paramName] = parseFloat(displayValue);
+                // Esta substituição é para exibição e para que parseFloat funcione se necessário
+                displayValue = value.replace(',', '.'); 
             }
             
-            // Atribui o valor decodificado para o elemento na página
+            // Atribui o valor decodificado e tratado para o elemento na página
+            const element = document.getElementById(id);
             if (element) {
                 element.textContent = displayValue + suffix;
                 dataFound = true;
                 // Armazena o valor decodificado e formatado para uso no relatório
                 collectedDataForReport[paramName] = displayValue;
             }
-        } else if (element) {
-            element.textContent = 'N/A';
-            collectedDataForReport[paramName] = 'N/A'; // Para garantir que apareça no relatório
+        } else { // Se o parâmetro não existe na URL
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = 'N/A';
+                collectedDataForReport[paramName] = 'N/A'; // Para garantir que apareça no relatório
+            }
         }
     }
 
@@ -96,7 +100,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Opcional: Limpar a URL (comentado por padrão)
     // history.replaceState({}, document.title, window.location.pathname);
 
-    // --- Função para gerar o texto do relatório (usará collectedDataForReport) ---
+    // --- Função para gerar o texto do relatório ---
+    // (Esta função é a mesma da versão anterior, pois `collectedDataForReport` já está tratado)
     function generateReportText(data) {
         let report = `--- Relatório de Diagnóstico de Sistema e SQL ---
 Data da Coleta: ${new Date().toLocaleString()}
