@@ -50,6 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
     fillElement('funcionariosEmpresaMaior', 'funcionariosEmpresaMaior');
     fillElement('funcionariosEmpresaTotal', 'funcionariosEmpresaTotal');
     fillElement('mediaXMLmensal', 'mediaXMLmensal');
+	fillElement('mediaXMLmensalVarejista', 'mediaXMLmensalVarejista');
     fillElement('sqlMaiorBancoBaseMB', 'sqlMaiorBancoBaseMB', ' MB');
     fillElement('sqlTotalBancoBaseMB', 'sqlTotalBancoBaseMB', ' MB');
     fillElement('windowsVersion', 'windowsVersion');
