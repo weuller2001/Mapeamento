@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
     fillElement('processorName', 'processorName');
     fillElement('coreCount', 'coreCount');
     fillElement('totalRamGB', 'totalRamGB', ' GB');
-    fillElement('sqlRamMB', 'sqlRamMB', ' GB');
+    fillElement('sqlRamMB', 'sqlRamDisplay', ' GB');
     fillElement('connectionType', 'connectionType');
     fillElement('diskReadSpeedMBps', 'diskReadSpeedMBps', ' MB/s');
     fillElement('diskWriteSpeedMBps', 'diskWriteSpeedMBps', ' MB/s');
