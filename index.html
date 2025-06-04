@@ -1,171 +1,57 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resultados do Diagnóstico de Sistema e SQL</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Download Agent Mapeamento</title>
+    <style>
+        body {
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .btn-download {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-download:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
+
     <div class="container">
-        <h1>Resultados do Diagnóstico de Sistema e SQL</h1>
-        <p>As informações coletadas pelo agente local estão sendo exibidas abaixo:</p>
-
-        <div id="loadingMessage" class="loading-message">
-            Carregando dados...
-        </div>
-        <div id="resultsContent" style="display: none;">
-
-            <h2>Dados do Cliente e Empresas</h2>
-			<div class="section-grid">
-            <div class="info-group">
-                <label>Informações do Cliente:</label>
-                <span id="clienteInfo"></span>
-            </div>
-            <div class="info-group">
-                <label>Empresas Ativas:</label>
-                <span id="empAtivas"></span>
-            </div>
-            <div class="info-group">
-                <label>Empresas Inativas:</label>
-                <span id="empInativas"></span>
-            </div>
-            <div class="info-group">
-                <label>Total de Empresas:</label>
-                <span id="empTotal"></span>
-            </div>
-            <div class="info-group">
-				<label>Maior Quadro de Funcionários:</label>
-                <span id="funcionariosEmpresaMaior"></span>
-            </div>
-            <div class="info-group">
-                <label>Total de Funcionários da Base:</label>
-                <span id="funcionariosEmpresaTotal"></span>
-            </div>
-            <div class="info-group">
-                <label>Média XML Mensal:</label>
-                <span id="mediaXMLmensal"></span>
-            </div>
-            <div class="info-group">
-                <label>Média XML Mensal (Varejista):</label>
-                <span id="mediaXMLmensalVarejista"></span>
-            </div>
-            <div class="info-group">
-                <label>Maior Banco de Dados:</label>
-                <span id="sqlMaiorBancoBaseMB"></span>
-            </div>
-            <div class="info-group">
-                <label>Tamanho Total da Base:</label>
-                <span id="sqlTotalBancoBaseMB"></span>
-            </div>
-		</div>
-
-            <h2>Dados do Ambiente</h2>
-            <div class="section-grid">
-			<div class="info-group">
-                <label>Versão do Windows:</label>
-                <span id="windowsVersion"></span>
-            </div>
-            <div class="info-group">
-                <label>Versão do SQL Server:</label>
-                <span id="sqlVersion"></span>
-            </div>
-            <div class="info-group">
-                <label>Nome do Processador:</label>
-                <span id="processorName"></span>
-            </div>
-            <div class="info-group">
-                <label>Número de Cores/Núcleos:</label>
-                <span id="coreCount"></span>
-            </div>
-            <div class="info-group">
-                <label>RAM Total:</label>
-                <span id="totalRamGB"></span>
-            </div>
-            <div class="info-group">
-                <label>RAM Alocada para SQL Server:</label>
-                <span id="sqlRamMB"></span>
-            </div>
-            <div class="info-group">
-                <label>Tipo de Conexão:</label>
-                <span id="connectionType"></span>
-            </div>
-            <div class="info-group">
-                <label>Velocidade de Leitura de Disco:</label>
-                <span id="diskReadSpeedMBps"></span>
-            </div>
-            <div class="info-group">
-                <label>Velocidade de Escrita de Disco:</label>
-                <span id="diskWriteSpeedMBps"></span>
-            </div>
-            <div class="info-group">
-                <label>Tipo de Disco:</label>
-                <span id="diskType"></span>
-            </div>
-            <div class="info-group">
-                <label>Tamanho Total do Disco:</label>
-                <span id="diskTotalGB"></span>
-            </div>
-            <div class="info-group">
-                <label>Pontuação CPU Multi-core:</label>
-                <span id="cpuMultiCoreScore"></span>
-            </div>
-            <div class="info-group">
-                <label>Velocidade de Upload (Mbps):</label>
-                <span id="internetUploadSpeedMbps"></span>
-            </div>
-            <div class="info-group">
-                <label>Velocidade de Download (Mbps):</label>
-                <span id="internetDownloadSpeedMbps"></span>
-            </div>
-		</div>
-
-            <h2>Parâmetros do Mapeamento</h2>
-		<div class="section-grid">
-            <div class="info-group">
-                <label>Certificado:</label>
-                <label><input name=certificado type="radio" id="certificadoA1"> A1</label>
-                <label><input name=certificado type="radio" id="certificadoA3"> A3</label>
-            </div>
-
-            <div class="info-group">
-                <label>Possuí Impressora Matricial:</label>
-                <label><input name=impressora type="radio" id="matricialNao"> Não</label>
-                <label><input name=impressora type="radio" id="matricialSim"> Sim</label>
-            </div>
-
-            <div class="info-group">
-                <label>Possuí NFe Express:</label>
-                <label><input name=nfe type="radio" id="nfeNao"> Não</label>
-                <label><input name=nfe type="radio" id="nfeSim"> Sim</label>
-            </div>
-
-            <div class="info-group">
-                <label>Utiliza NGPonto:</label>
-                <label><input name=ponto type="radio" id="pontoNao"> Não</label>
-                <label><input name=ponto type="radio" id="pontoSim"> Sim</label>
-            </div>
-
-            <div class="info-group">
-                <label>Utiliza Holos/People:</label>
-                <label><input name=holos type="radio" id="holosNao"> Não</label>
-                <label><input name=holos type="radio" id="holosSim"> Sim</label>
-            </div>
-
-            <div class="info-group">
-                <label>Precisa de VPN:</label>
-                <label><input name=vpn type="radio" id="vpnNao"> Não</label>
-                <label><input name=vpn type="radio" id="vpnSim"> Sim</label>
-            </div>
-		</div>
-			<br>
-			<br>
-            <button id="downloadReportBtn">
-                Enviar Resultado
-            </button>
-			<br>
+        <h1>Download do Agent Mapeamento</h1>
+        <a class="btn-download" href="https://github.com/usuario/repositorio/raw/main/agent/releases/AgentMapeamento.exe" download>
+            📥 Baixar AgentMapeamento.exe
+        </a>
     </div>
 
-    <script src="script.js"></script>
 </body>
 </html>

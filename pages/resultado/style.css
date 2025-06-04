@@ -1,0 +1,117 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+h1, h2 {
+    text-align: center;
+    color: #333;
+}
+
+p {
+    text-align: center;
+}
+
+.loading-message {
+    text-align: center;
+    font-size: 1.2em;
+    color: #555;
+}
+
+/* Define os blocos em até 3 por linha */
+.info-group {
+    background-color: #f0f4f8;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 15px;
+    box-sizing: border-box;
+    margin: 8px;
+    flex: 1 1 30%;
+    min-width: 250px;
+}
+
+.info-group label {
+    font-weight: bold;
+    color: #333;
+}
+
+.info-group span {
+    display: block;
+    margin-top: 5px;
+    color: #555;
+}
+
+/* Organiza os grupos em linha */
+#resultsContent {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* Grade para os grupos de informações */
+.section-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+/* Responsivo para telas menores */
+@media (max-width: 900px) {
+    .section-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .section-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Cada bloco */
+.info-group {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.info-group label {
+    font-weight: bold;
+    color: #444;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.info-group span {
+    color: #555;
+}
+
+/* Botão */
+button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    display: block;
+    margin: 0 auto;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
