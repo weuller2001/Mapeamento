@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="icon" type="image" href="../../img/Keevo.ico">
+    <link rel="icon" type="image" href="../../img/Keevo.ico">
     <title>Resultados do Diagnóstico de Sistema e SQL</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -18,7 +18,7 @@
         <div id="resultsContent" style="display: none;">
 
             <h2>Dados do Cliente e Empresas</h2>
-			<div class="section-grid">
+            <div class="section-grid">
             <div class="info-group">
                 <label>Informações do Cliente:</label>
                 <span id="clienteInfo"></span>
@@ -36,7 +36,7 @@
                 <span id="empTotal"></span>
             </div>
             <div class="info-group">
-				<label>Maior Quadro de Funcionários:</label>
+                <label>Maior Quadro de Funcionários:</label>
                 <span id="funcionariosEmpresaMaior"></span>
             </div>
             <div class="info-group">
@@ -59,11 +59,11 @@
                 <label>Tamanho Total da Base:</label>
                 <span id="sqlTotalBancoBaseMB"></span>
             </div>
-		</div>
+        </div>
 
             <h2>Dados do Ambiente</h2>
             <div class="section-grid">
-			<div class="info-group">
+            <div class="info-group">
                 <label>Versão do Windows:</label>
                 <span id="windowsVersion"></span>
             </div>
@@ -119,60 +119,60 @@
                 <label>Velocidade de Download (Mbps):</label>
                 <span id="internetDownloadSpeedMbps"></span>
             </div>
-		</div>
+        </div>
 
             <h2>Parâmetros do Mapeamento</h2>
-		<div class="section-grid">
+        <div class="section-grid">
             <div class="info-group">
                 <label>Certificado:</label>
-                <label><input name="certificado" type="radio" id="certificadoA1"> A1</label>
-                <label><input name="certificado" type="radio" id="certificadoA3"> A3</label>
+                <label><input name="certificado" type="radio" id="certificadoA1" value="A1"> A1</label>
+                <label><input name="certificado" type="radio" id="certificadoA3" value="A3"> A3</label>
             </div>
 
             <div class="info-group">
                 <label>Possuí Impressora Matricial:</label>
-                <label><input name="impressora" type="radio" id="matricialNao"> Não</label>
-                <label><input name="impressora" type="radio" id="matricialSim"> Sim</label>
+                <label><input name="impressora" type="radio" id="matricialNao" value="Não"> Não</label>
+                <label><input name="impressora" type="radio" id="matricialSim" value="Sim"> Sim</label>
             </div>
 
             <div class="info-group">
                 <label>Possuí NFe Express:</label>
-                <label><input name="nfe" type="radio" id="nfeNao"> Não</label>
-                <label><input name="nfe" type="radio" id="nfeSim"> Sim</label>
+                <label><input name="nfe" type="radio" id="nfeNao" value="Não"> Não</label>
+                <label><input name="nfe" type="radio" id="nfeSim" value="Sim"> Sim</label>
             </div>
 
             <div class="info-group">
                 <label>Utiliza NGPonto:</label>
-                <label><input name="ponto" type="radio" id="pontoNao"> Não</label>
-                <label><input name="ponto" type="radio" id="pontoSim"> Sim</label>
+                <label><input name="ponto" type="radio" id="pontoNao" value="Não"> Não</label>
+                <label><input name="ponto" type="radio" id="pontoSim" value="Sim"> Sim</label>
             </div>
 
             <div class="info-group">
                 <label>Utiliza Holos/People:</label>
-                <label><input name="holos" type="radio" id="holosNao"> Não</label>
-                <label><input name="holos" type="radio" id="holosSim"> Sim</label>
+                <label><input name="holos" type="radio" id="holosNao" value="Não"> Não</label>
+                <label><input name="holos" type="radio" id="holosSim" value="Sim"> Sim</label>
             </div>
 
             <div class="info-group">
                 <label>Precisa de VPN:</label>
-                <label><input name="vpn" type="radio" id="vpnNao"> Não</label>
-                <label><input name="vpn" type="radio" id="vpnSim"> Sim</label>
+                <label><input name="vpn" type="radio" id="vpnNao" value="Não"> Não</label>
+                <label><input name="vpn" type="radio" id="vpnSim" value="Sim"> Sim</label>
             </div>
-			<div class="info-group">
-			<label>Quantidade de Usuários para acesso:</label>
-			<label><input type="text" id="qtdUsuarios" class="info-group"</label>
-			</div>
-			<div class="info-group">
-			<label>Número do Chamado:</label>
-			<label><input type="text" id="codChamado" class="info-group"</label>
-			</div>
-		</div>
-			<br>
-			<br>
+            <div class="info-group">
+                <label>Quantidade de Usuários para acesso:</label>
+                <input type="text" id="qtdUsuarios" class="form-control"> 
+            </div>
+            <div class="info-group">
+                <label>Número do Chamado:</label>
+                <input type="text" id="codChamado" class="form-control">
+            </div>
+        </div>
+            <br>
+            <br>
             <button id="processButton">
                 Enviar Resultado
             </button>
-			<br>
+            <br>
     </div>
 
     <script src="script.js"></script>

@@ -106,12 +106,36 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Função para coletar os campos que o cliente Preenche
     function getMappingParameters() {
-        const certificado = document.querySelector('input[name="certificado"]:checked')?.id || 'N/A';
-        const impressora = document.querySelector('input[name="impressora"]:checked')?.id || 'N/A';
-        const nfe = document.querySelector('input[name="nfe"]:checked')?.id || 'N/A';
-        const ponto = document.querySelector('input[name="ponto"]:checked')?.id || 'N/A';
-        const holos = document.querySelector('input[name="holos"]:checked')?.id || 'N/A';
-        const vpn = document.querySelector('input[name="vpn"]:checked')?.id || 'N/A';
+        // Para radio buttons, pegue o valor associado ao radio selecionado
+        // Em vez de .id, vamos pegar o .value ou, se não houver, o texto visível.
+        // A melhor prática é dar um 'value' aos radio buttons que seja o texto que você quer ver no relatório.
+
+        // Exemplo:
+        // Se o seu HTML for <input type="radio" name="certificado" id="certificadoA1" value="A1"> A1</label>
+        // Use .value
+
+        // Se o seu HTML for <input type="radio" name="certificado" id="certificadoA1"> A1</label>
+        // Você precisaria pegar o texto do label associado, o que é mais complexo.
+        // A forma mais robusta é usar o `value` no input radio.
+        
+        const getRadioValue = (name) => {
+            const selectedRadio = document.querySelector(`input[name="${name}"]:checked`);
+            if (selectedRadio) {
+                // Se o radio button tiver um 'value', use-o.
+                // Caso contrário, use o 'id' como fallback.
+                return selectedRadio.value || selectedRadio.id; 
+            }
+            return 'N/A';
+        };
+
+        const certificado = getRadioValue('certificado');
+        const impressora = getRadioValue('impressora');
+        const nfe = getRadioValue('nfe');
+        const ponto = getRadioValue('ponto');
+        const holos = getRadioValue('holos');
+        const vpn = getRadioValue('vpn');
+
+        // Para inputs de texto, .value.trim() está correto
         const qtdUsuarios = document.getElementById('qtdUsuarios')?.value.trim() || 'N/A';
         const codChamado = document.getElementById('codChamado')?.value.trim() || 'N/A';
 
