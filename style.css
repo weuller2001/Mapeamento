@@ -1,54 +1,81 @@
-/* style.css */
-
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 20px;
-    background-color: #f4f7f6;
-    color: #333;
-    line-height: 1.6;
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 20px;
 }
 
 .container {
-    max-width: 900px;
-    margin: 20px auto;
-    background-color: #fff;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
 h1, h2 {
-    color: #0056b3;
-    border-bottom: 2px solid #e0e0e0;
-    padding-bottom: 10px;
-    margin-top: 30px;
+    text-align: center;
+    color: #333;
 }
 
-.info-group {
-    margin-bottom: 20px;
-}
-
-.info-group label {
-    font-weight: bold;
-    display: block;
-    margin-bottom: 5px;
-    color: #555;
-}
-
-.info-group span {
-    display: block;
-    background-color: #f0f8ff;
-    border: 1px solid #cce7ff;
-    padding: 10px 15px;
-    border-radius: 5px;
-    font-family: 'Courier New', Courier, monospace;
-    color: #004085;
-    word-wrap: break-word; /* Garante que textos longos quebrem a linha */
+p {
+    text-align: center;
 }
 
 .loading-message {
     text-align: center;
-    font-size: 1.1em;
-    color: #666;
-    margin-top: 50px;
+    font-size: 1.2em;
+    color: #555;
+}
+
+/* Define os blocos em até 3 por linha */
+.info-group {
+    background-color: #f0f4f8;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 15px;
+    box-sizing: border-box;
+    margin: 8px;
+    flex: 1 1 30%;
+    min-width: 250px;
+}
+
+.info-group label {
+    font-weight: bold;
+    color: #333;
+}
+
+.info-group span {
+    display: block;
+    margin-top: 5px;
+    color: #555;
+}
+
+/* Organiza os grupos em linha */
+#resultsContent > h2,
+#resultsContent > label {
+    width: 100%;
+    margin-top: 30px;
+    color: #444;
+}
+
+#resultsContent {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* Para os labels específicos dos grupos de radio */
+.info-group input[type="radio"] {
+    margin-left: 8px;
+}
+
+/* Botão */
+button {
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #0056b3;
 }
