@@ -79,10 +79,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (processButton) {
             processButton.addEventListener('click', () => {
 				const mappingParams = getMappingParameters();
-				const completeData = {
-					...collectedDataForReport,
-					...mappingParams
-				};
                 const reportText = generateReportText(collectedDataForReport);
                 const blob = new Blob([reportText], { type: 'text/plain' });
                 const url = URL.createObjectURL(blob);
@@ -105,25 +101,25 @@ document.addEventListener('DOMContentLoaded', function() {
 	
 	//ouvir os campos que o cliente Preenche
 	function getMappingParameters() {
-    const certificado = document.querySelector('input[name="certificado"]:checked')?.id || 'N/A';
-    const impressora = document.querySelector('input[name="impressora"]:checked')?.id || 'N/A';
-    const nfe = document.querySelector('input[name="nfe"]:checked')?.id || 'N/A';
-    const ponto = document.querySelector('input[name="ponto"]:checked')?.id || 'N/A';
-    const holos = document.querySelector('input[name="holos"]:checked')?.id || 'N/A';
-    const vpn = document.querySelector('input[name="vpn"]:checked')?.id || 'N/A';
-    const qtdUsuarios = document.getElementById('qtdUsuarios')?.value || 'N/A';
-    const codChamado = document.getElementById('codChamado')?.value || 'N/A';
+        const certificado = document.querySelector('input[name="certificado"]:checked')?.id || 'N/A';
+        const impressora = document.querySelector('input[name="impressora"]:checked')?.id || 'N/A';
+        const nfe = document.querySelector('input[name="nfe"]:checked')?.id || 'N/A';
+        const ponto = document.querySelector('input[name="ponto"]:checked')?.id || 'N/A';
+        const holos = document.querySelector('input[name="holos"]:checked')?.id || 'N/A';
+        const vpn = document.querySelector('input[name="vpn"]:checked')?.id || 'N/A';
+        const qtdUsuarios = document.getElementById('qtdUsuarios')?.value || 'N/A';
+        const codChamado = document.getElementById('codChamado')?.value || 'N/A';
 
-    return {
-        certificado,
-        impressora,
-        nfe,
-        ponto,
-        holos,
-        vpn,
-        qtdUsuarios,
-        codChamado
-    };
+        return {
+            certificado,
+            impressora,
+            nfe,
+            ponto,
+            holos,
+            vpn,
+            qtdUsuarios,
+            codChamado
+        };
 }
 
     // Opcional: Limpar a URL (comentado por padrão)
@@ -163,15 +159,15 @@ Pontuação CPU Multi-core: ${data.cpuMultiCoreScore || 'N/A'}
 Velocidade de Upload(Aproximado): ${data.internetUploadSpeedMbps || 'N/A'} Mbps
 Velocidade de Download(Aproximado): ${data.internetDownloadSpeedMbps || 'N/A'} Mbps
 
-##Parametos do Mapeamento
-Possuí Impressora Matricial: ${data.impressora || 'N/A'}
-Possuí NFe Express: ${data.nfe || 'N/A'}
-Utiliza NGPonto: ${data.ponto || 'N/A'}
-Utiliza Holos/People: ${data.holos || 'N/A'}
-Precisa de VPN: ${data.vpn || 'N/A'}
-Certificado Digital: ${data.certificado || 'N/A'}
-Quantidade de Usuários para acesso: ${data.qtdUsuarios || 'N/A'}
-Número do Chamado: ${data.codChamado || 'N/A'}
+## Parâmetros do Mapeamento
+Possui Impressora Matricial: ${data.impressora}
+Possui NFe Express: ${data.nfe}
+Utiliza NGPonto: ${data.ponto}
+Utiliza Holos/People: ${data.holos}
+Precisa de VPN: ${data.vpn}
+Certificado Digital: ${data.certificado}
+Quantidade de Usuários para acesso: ${data.qtdUsuarios}
+Número do Chamado: ${data.codChamado}
 --------------------------------------------------
 `;
         return report;
