@@ -14,10 +14,10 @@
         <div id="loadingMessage" class="loading-message">
             Carregando dados...
         </div>
-
         <div id="resultsContent" style="display: none;">
 
             <h2>Dados do Cliente e Empresas</h2>
+			<div class="section-grid">
             <div class="info-group">
                 <label>Informações do Cliente:</label>
                 <span id="clienteInfo"></span>
@@ -58,9 +58,11 @@
                 <label>Tamanho Total da Base:</label>
                 <span id="sqlTotalBancoBaseMB"></span>
             </div>
+		</div>
 
             <h2>Dados do Ambiente (SO, Hardware e SQL Server)</h2>
-            <div class="info-group">
+            <div class="section-grid">
+			<div class="info-group">
                 <label>Versão do Windows:</label>
                 <span id="windowsVersion"></span>
             </div>
@@ -104,8 +106,6 @@
                 <label>Tamanho Total do Disco:</label>
                 <span id="diskTotalGB"></span>
             </div>
-
-            <h2>Resultados de Benchmarks</h2>
             <div class="info-group">
                 <label>Pontuação CPU Multi-core:</label>
                 <span id="cpuMultiCoreScore"></span>
@@ -118,45 +118,48 @@
                 <label>Velocidade de Download (Mbps):</label>
                 <span id="internetDownloadSpeedMbps"></span>
             </div>
+		</div>
 
             <h2>Parâmetros do Mapeamento</h2>
-
+		<div class="section-grid">
             <div class="info-group">
                 <label>Certificado:</label>
-                <label><input type="radio" id="certificadoA1"> A1</label>
-                <label><input type="radio" id="certificadoA3"> A3</label>
+                <label><input name=certificado type="radio" id="certificadoA1"> A1</label>
+                <label><input name=certificado type="radio" id="certificadoA3"> A3</label>
             </div>
 
             <div class="info-group">
                 <label>Possuí Impressora Matricial:</label>
-                <label><input type="radio" id="matricialNao"> Não</label>
-                <label><input type="radio" id="matricialSim"> Sim</label>
+                <label><input name=impressora type="radio" id="matricialNao"> Não</label>
+                <label><input name=impressora type="radio" id="matricialSim"> Sim</label>
             </div>
 
             <div class="info-group">
                 <label>Possuí NFe Express:</label>
-                <label><input type="radio" id="nfeNao"> Não</label>
-                <label><input type="radio" id="nfeSim"> Sim</label>
+                <label><input name=nfe type="radio" id="nfeNao"> Não</label>
+                <label><input name=nfe type="radio" id="nfeSim"> Sim</label>
             </div>
 
             <div class="info-group">
                 <label>Utiliza NGPonto:</label>
-                <label><input type="radio" id="pontoNao"> Não</label>
-                <label><input type="radio" id="pontoSim"> Sim</label>
+                <label><input name=ponto type="radio" id="pontoNao"> Não</label>
+                <label><input name=ponto type="radio" id="pontoSim"> Sim</label>
             </div>
 
             <div class="info-group">
                 <label>Utiliza Holos/People:</label>
-                <label><input type="radio" id="holosNao"> Não</label>
-                <label><input type="radio" id="holosSim"> Sim</label>
+                <label><input name=holos type="radio" id="holosNao"> Não</label>
+                <label><input name=holos type="radio" id="holosSim"> Sim</label>
             </div>
 
             <div class="info-group">
                 <label>Precisa de VPN:</label>
-                <label><input type="radio" id="vpnNao"> Não</label>
-                <label><input type="radio" id="vpnSim"> Sim</label>
+                <label><input name=vpn type="radio" id="vpnNao"> Não</label>
+                <label><input name=vpn type="radio" id="vpnSim"> Sim</label>
             </div>
-
+		</div>
+			<br>
+			<br>
             <button id="downloadReportBtn">
                 Baixar Relatório (.txt)
             </button>
