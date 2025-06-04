@@ -6,24 +6,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const loadingMessage = document.getElementById('loadingMessage');
     const processButton = document.getElementById('processButton');
 	
-	const certificado = document.querySelector('input[name="certificado"]:checked')?.id || 'N/A';
-    const impressora = document.querySelector('input[name="impressora"]:checked')?.id || 'N/A';
-    const nfe = document.querySelector('input[name="nfe"]:checked')?.id || 'N/A';
-    const ponto = document.querySelector('input[name="ponto"]:checked')?.id || 'N/A';
-    const holos = document.querySelector('input[name="holos"]:checked')?.id || 'N/A';
-    const vpn = document.querySelector('input[name="vpn"]:checked')?.id || 'N/A';
-    const qtdUsuarios = document.getElementById('qtdUsuarios').value || 'N/A';
-    const codChamado = document.getElementById('codChamado').value || 'N/A';
-	
-	params.append('certificado', certificado);
-    params.append('impressora', impressora);
-    params.append('nfe', nfe);
-    params.append('ponto', ponto);
-    params.append('holos', holos);
-    params.append('vpn', vpn);
-    params.append('qtdUsuarios', qtdUsuarios);
-    params.append('codChamado', codChamado);
-	
     let dataFound = false;
     let collectedDataForReport = {}; // Armazenar os dados decodificados para o relatório
 
@@ -116,6 +98,29 @@ document.addEventListener('DOMContentLoaded', function() {
             processButton.style.display = 'none';
         }
     }
+	
+	//ouvir os campos que o cliente Preenche
+	function getMappingParameters() {
+    const certificado = document.querySelector('input[name="certificado"]:checked')?.id || 'N/A';
+    const impressora = document.querySelector('input[name="impressora"]:checked')?.id || 'N/A';
+    const nfe = document.querySelector('input[name="nfe"]:checked')?.id || 'N/A';
+    const ponto = document.querySelector('input[name="ponto"]:checked')?.id || 'N/A';
+    const holos = document.querySelector('input[name="holos"]:checked')?.id || 'N/A';
+    const vpn = document.querySelector('input[name="vpn"]:checked')?.id || 'N/A';
+    const qtdUsuarios = document.getElementById('qtdUsuarios')?.value || 'N/A';
+    const codChamado = document.getElementById('codChamado')?.value || 'N/A';
+
+    return {
+        certificado,
+        impressora,
+        nfe,
+        ponto,
+        holos,
+        vpn,
+        qtdUsuarios,
+        codChamado
+    };
+}
 
     // Opcional: Limpar a URL (comentado por padrão)
     // history.replaceState({}, document.title, window.location.pathname);
@@ -144,7 +149,7 @@ Versão do SQL Server: ${data.sqlVersion || 'N/A'}
 Nome do Processador: ${data.processorName || 'N/A'}
 Número de Cores/Núcleos: ${data.coreCount || 'N/A'}
 RAM Total: ${data.totalRamGB || 'N/A'} GB
-RAM Alocada para SQL Server: ${data.sqlRamDisplay || 'N/A'} MB
+RAM Alocada para SQL Server: ${data.sqlRamDisplay || 'N/A'}
 Tipo de Conexão: ${data.connectionType || 'N/A'}
 Velocidade de Leitura de Disco: ${data.diskReadSpeedMBps || 'N/A'} MB/s
 Velocidade de Escrita de Disco: ${data.diskWriteSpeedMBps || 'N/A'} MB/s
