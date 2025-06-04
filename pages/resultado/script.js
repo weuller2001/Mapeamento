@@ -4,7 +4,26 @@ document.addEventListener('DOMContentLoaded', function() {
     const params = new URLSearchParams(window.location.search); // Lê os parâmetros da URL
     const resultsContent = document.getElementById('resultsContent');
     const loadingMessage = document.getElementById('loadingMessage');
-    const downloadReportBtn = document.getElementById('downloadReportBtn');
+    const processButton = document.getElementById('processButton');
+	
+	const certificado = document.querySelector('input[name="certificado"]:checked')?.id || 'N/A';
+    const impressora = document.querySelector('input[name="impressora"]:checked')?.id || 'N/A';
+    const nfe = document.querySelector('input[name="nfe"]:checked')?.id || 'N/A';
+    const ponto = document.querySelector('input[name="ponto"]:checked')?.id || 'N/A';
+    const holos = document.querySelector('input[name="holos"]:checked')?.id || 'N/A';
+    const vpn = document.querySelector('input[name="vpn"]:checked')?.id || 'N/A';
+    const qtdUsuarios = document.getElementById('qtdUsuarios').value || 'N/A';
+    const codChamado = document.getElementById('codChamado').value || 'N/A';
+	
+	params.append('certificado', certificado);
+    params.append('impressora', impressora);
+    params.append('nfe', nfe);
+    params.append('ponto', ponto);
+    params.append('holos', holos);
+    params.append('vpn', vpn);
+    params.append('qtdUsuarios', qtdUsuarios);
+    params.append('codChamado', codChamado);
+	
     let dataFound = false;
     let collectedDataForReport = {}; // Armazenar os dados decodificados para o relatório
 
@@ -58,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
     fillElement('processorName', 'processorName');
     fillElement('coreCount', 'coreCount');
     fillElement('totalRamGB', 'totalRamGB', ' GB');
-    fillElement('sqlRamMB', 'sqlRamDisplay');
+    fillElement('sqlRamDisplay', 'sqlRamDisplay');
     fillElement('connectionType', 'connectionType');
     fillElement('diskReadSpeedMBps', 'diskReadSpeedMBps', ' MB/s');
     fillElement('diskWriteSpeedMBps', 'diskWriteSpeedMBps', ' MB/s');
@@ -75,8 +94,8 @@ document.addEventListener('DOMContentLoaded', function() {
         resultsContent.style.display = 'block';
 
         // Habilitar o botão de download após os dados serem carregados
-        if (downloadReportBtn) {
-            downloadReportBtn.addEventListener('click', () => {
+        if (processButton) {
+            processButton.addEventListener('click', () => {
                 // A função generateReportText agora usa collectedDataForReport
                 const reportText = generateReportText(collectedDataForReport);
                 const blob = new Blob([reportText], { type: 'text/plain' });
@@ -93,8 +112,8 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
         loadingMessage.textContent = "Nenhum dado válido encontrado na URL. Certifique-se de que o agente foi executado corretamente.";
         // Desabilitar o botão de download se não houver dados
-        if (downloadReportBtn) {
-            downloadReportBtn.style.display = 'none';
+        if (processButton) {
+            processButton.style.display = 'none';
         }
     }
 
@@ -112,11 +131,12 @@ Informações do Cliente: ${data.clienteInfo || 'N/A'}
 Empresas Ativas: ${data.empAtivas || 'N/A'}
 Empresas Inativas: ${data.empInativas || 'N/A'}
 Total de Empresas: ${data.empTotal || 'N/A'}
-Funcionários da Empresa com Mais Funcionários: ${data.funcionariosEmpresaMaior || 'N/A'}
+Maior Quadro de Funcionários: ${data.funcionariosEmpresaMaior || 'N/A'}
 Total de Funcionários da Base: ${data.funcionariosEmpresaTotal || 'N/A'}
 Média XML Mensal: ${data.mediaXMLmensal || 'N/A'}
-Maior Banco de Dados: ${data.sqlMaiorBancoBaseMB || 'N/A'} MB
-Tamanho Total da Base: ${data.sqlTotalBancoBaseMB || 'N/A'} MB
+Média XML Mensal(Varejista): ${data.mediaXMLmensalVarejista || 'N/A'}
+Maior Banco de Dados: ${data.sqlMaiorBancoBaseMB || 'N/A'} GB
+Tamanho Total da Base: ${data.sqlTotalBancoBaseMB || 'N/A'} GB
 
 ## Dados do Ambiente (SO, Hardware e SQL Server)
 Versão do Windows: ${data.windowsVersion || 'N/A'}
@@ -124,17 +144,25 @@ Versão do SQL Server: ${data.sqlVersion || 'N/A'}
 Nome do Processador: ${data.processorName || 'N/A'}
 Número de Cores/Núcleos: ${data.coreCount || 'N/A'}
 RAM Total: ${data.totalRamGB || 'N/A'} GB
-RAM Alocada para SQL Server: ${data.sqlRamMB || 'N/A'} MB
+RAM Alocada para SQL Server: ${data.sqlRamDisplay || 'N/A'} MB
 Tipo de Conexão: ${data.connectionType || 'N/A'}
 Velocidade de Leitura de Disco: ${data.diskReadSpeedMBps || 'N/A'} MB/s
 Velocidade de Escrita de Disco: ${data.diskWriteSpeedMBps || 'N/A'} MB/s
 Tipo de Disco: ${data.diskType || 'N/A'}
 Tamanho Total do Disco: ${data.diskTotalGB || 'N/A'} GB
-
-## Resultados de Benchmarks
 Pontuação CPU Multi-core: ${data.cpuMultiCoreScore || 'N/A'}
-Velocidade de Upload: ${data.internetUploadSpeedMbps || 'N/A'} Mbps
-Velocidade de Download: ${data.internetDownloadSpeedMbps || 'N/A'} Mbps
+Velocidade de Upload(Aproximado): ${data.internetUploadSpeedMbps || 'N/A'} Mbps
+Velocidade de Download(Aproximado): ${data.internetDownloadSpeedMbps || 'N/A'} Mbps
+
+##Parametos do Mapeamento
+Possuí Impressora Matricial: ${data.impressora || 'N/A'}
+Possuí NFe Express: ${data.nfe || 'N/A'}
+Utiliza NGPonto: ${data.ponto || 'N/A'}
+Utiliza Holos/People: ${data.holos || 'N/A'}
+Precisa de VPN: ${data.vpn || 'N/A'}
+Certificado Digital: ${data.certificado || 'N/A'}
+Quantidade de Usuários para acesso: ${data.qtdUsuarios || 'N/A'}
+Número do Chamado: ${data.codChamado || 'N/A'}
 --------------------------------------------------
 `;
         return report;
