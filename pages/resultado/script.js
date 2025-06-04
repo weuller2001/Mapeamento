@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const processButton = document.getElementById('processButton');
 	//ouvir campos manuais do cliente
 	const mappingParams = getMappingParameters();
-
 	params.append('certificado', mappingParams.certificado);
 	params.append('impressora', mappingParams.impressora);
 	params.append('nfe', mappingParams.nfe);
