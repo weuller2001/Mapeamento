@@ -5,6 +5,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const resultsContent = document.getElementById('resultsContent');
     const loadingMessage = document.getElementById('loadingMessage');
     const processButton = document.getElementById('processButton');
+	//ouvir campos manuais do cliente
+	const mappingParams = getMappingParameters();
+
+	params.append('certificado', mappingParams.certificado);
+	params.append('impressora', mappingParams.impressora);
+	params.append('nfe', mappingParams.nfe);
+	params.append('ponto', mappingParams.ponto);
+	params.append('holos', mappingParams.holos);
+	params.append('vpn', mappingParams.vpn);
+	params.append('qtdUsuarios', mappingParams.qtdUsuarios);
+	params.append('codChamado', mappingParams.codChamado);
 	
     let dataFound = false;
     let collectedDataForReport = {}; // Armazenar os dados decodificados para o relatório
