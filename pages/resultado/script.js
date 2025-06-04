@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Habilitar o botão de download após os dados serem carregados
         if (processButton) {
             processButton.addEventListener('click', () => {
-				const mappingParams = getMappingParameters();
+				const data = getMappingParameters();
                 const reportText = generateReportText(collectedDataForReport);
                 const blob = new Blob([reportText], { type: 'text/plain' });
                 const url = URL.createObjectURL(blob);
@@ -107,8 +107,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const ponto = document.querySelector('input[name="ponto"]:checked')?.id || 'N/A';
         const holos = document.querySelector('input[name="holos"]:checked')?.id || 'N/A';
         const vpn = document.querySelector('input[name="vpn"]:checked')?.id || 'N/A';
-        const qtdUsuarios = document.getElementById('qtdUsuarios')?.value || 'N/A';
-        const codChamado = document.getElementById('codChamado')?.value || 'N/A';
+        const qtdUsuarios = document.getElementById('qtdUsuarios')?.value.trim() || 'N/A';
+        const codChamado = document.getElementById('codChamado')?.value.trim() || 'N/A';
 
         return {
             certificado,
@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
             qtdUsuarios,
             codChamado
         };
-}
+	}
 
     // Opcional: Limpar a URL (comentado por padrão)
     // history.replaceState({}, document.title, window.location.pathname);
