@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const resultsContent = document.getElementById('resultsContent');
     const loadingMessage = document.getElementById('loadingMessage');
     const processButton = document.getElementById('processButton');
-	
+    
     let dataFound = false;
     let collectedDataForReport = {}; // Armazenar os dados decodificados para o relatório
 
@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
     fillElement('funcionariosEmpresaMaior', 'funcionariosEmpresaMaior');
     fillElement('funcionariosEmpresaTotal', 'funcionariosEmpresaTotal');
     fillElement('mediaXMLmensal', 'mediaXMLmensal');
-	fillElement('mediaXMLmensalVarejista', 'mediaXMLmensalVarejista');
+    fillElement('mediaXMLmensalVarejista', 'mediaXMLmensalVarejista');
     fillElement('sqlMaiorBancoBaseMB', 'sqlMaiorBancoBaseMB', ' GB');
     fillElement('sqlTotalBancoBaseMB', 'sqlTotalBancoBaseMB', ' GB');
     fillElement('windowsVersion', 'windowsVersion');
@@ -78,8 +78,13 @@ document.addEventListener('DOMContentLoaded', function() {
         // Habilitar o botão de download após os dados serem carregados
         if (processButton) {
             processButton.addEventListener('click', () => {
-				const data = getMappingParameters();
-                const reportText = generateReportText(collectedDataForReport);
+                // Coleta os dados dos campos de mapeamento preenchidos pelo usuário
+                const mappingData = getMappingParameters();
+                
+                // Combina os dados da URL com os dados do mapeamento para o relatório final
+                const finalReportData = { ...collectedDataForReport, ...mappingData };
+
+                const reportText = generateReportText(finalReportData);
                 const blob = new Blob([reportText], { type: 'text/plain' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -98,9 +103,9 @@ document.addEventListener('DOMContentLoaded', function() {
             processButton.style.display = 'none';
         }
     }
-	
-	//ouvir os campos que o cliente Preenche
-	function getMappingParameters() {
+    
+    // Função para coletar os campos que o cliente Preenche
+    function getMappingParameters() {
         const certificado = document.querySelector('input[name="certificado"]:checked')?.id || 'N/A';
         const impressora = document.querySelector('input[name="impressora"]:checked')?.id || 'N/A';
         const nfe = document.querySelector('input[name="nfe"]:checked')?.id || 'N/A';
@@ -120,13 +125,12 @@ document.addEventListener('DOMContentLoaded', function() {
             qtdUsuarios,
             codChamado
         };
-	}
+    }
 
     // Opcional: Limpar a URL (comentado por padrão)
     // history.replaceState({}, document.title, window.location.pathname);
 
     // --- Função para gerar o texto do relatório ---
-    // (Esta função é a mesma da versão anterior, pois `collectedDataForReport` já está tratado)
     function generateReportText(data) {
         let report = `--- Relatório de Diagnóstico de Sistema e SQL ---
 Data da Coleta: ${new Date().toLocaleString()}
