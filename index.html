@@ -16,6 +16,7 @@
         </div>
 
         <div id="resultsContent" style="display: none;">
+
             <h2>Dados do Cliente e Empresas</h2>
             <div class="info-group">
                 <label>Informações do Cliente:</label>
@@ -45,10 +46,10 @@
                 <label>Média XML Mensal:</label>
                 <span id="mediaXMLmensal"></span>
             </div>
-			<div class="info-group">
-				<label>Média XML Mensal (Varejista):</label>
-				<span id="mediaXMLmensalVarejista"></span>
-			</div>
+            <div class="info-group">
+                <label>Média XML Mensal (Varejista):</label>
+                <span id="mediaXMLmensalVarejista"></span>
+            </div>
             <div class="info-group">
                 <label>Maior Banco de Dados:</label>
                 <span id="sqlMaiorBancoBaseMB"></span>
@@ -117,69 +118,49 @@
                 <label>Velocidade de Download (Mbps):</label>
                 <span id="internetDownloadSpeedMbps"></span>
             </div>
-			<label">Parametros do Mapeamento </label>
-			<div class="info-group">
-				<label class="info-group">Certificado:
-					<input type="radio" id="certificadoA1">A1
-				</label>
-				<label class="info-group">
-					<input type="radio" id="certificadoA3">A3
-				</label>
-			</div>
-			<div class="info-group">
-				<label class="info-group">Possuí Impressora Matricial:
-					<input type="radio" id="matricialNao">Não
-				</label>
-				<label class="info-group">
-					<input type="radio" id="matricialSim">Sim
-				</label>
-			</div>
-			<div class="info-group">
-				<label class="info-group">Possuí NFe Express:
-					<input type="radio" id="nfeNao">Não
-				</label>
-				<label class="info-group">
-					<input type="radio" id="nfeSim">Sim
-				</label>
-			</div>
-			<div class="info-group">
-				<label class="info-group">Utiliza NGPonto:
-					<input type="radio" id="pontoNao">Não
-				</label>
-				<label class="info-group">
-					<input type="radio" id="pontoSim">Sim
-				</label>
-			</div>
-			<div class="info-group">
-				<label class="info-group">Utiliza Holos/People:
-					<input type="radio" id="holosNao">Não
-				</label>
-				<label class="info-group">
-					<input type="radio" id="holosSim">Sim
-				</label>
-			</div>
-			<div class="info-group">
-				<label class="info-group">Precisa de VPN:
-					<input type="radio" id="vpnNao">Não
-				</label>
-				<label class="info-group">
-					<input type="radio" id="vpnSim">Sim
-				</label>
-			</div>
-            <button id="downloadReportBtn" style="
-                background-color: #007bff;
-                color: white;
-                padding: 12px 25px;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-                font-size: 1em;
-                margin-top: 20px;
-                display: block; /* Para ocupar a largura total e centralizar se quiser */
-                width: fit-content;
-                margin-left: auto;
-                margin-right: auto;
-            ">Baixar Relatório (.txt)</button>
+
+            <h2>Parâmetros do Mapeamento</h2>
+
+            <div class="info-group">
+                <label>Certificado:</label>
+                <label><input type="radio" id="certificadoA1"> A1</label>
+                <label><input type="radio" id="certificadoA3"> A3</label>
+            </div>
+
+            <div class="info-group">
+                <label>Possuí Impressora Matricial:</label>
+                <label><input type="radio" id="matricialNao"> Não</label>
+                <label><input type="radio" id="matricialSim"> Sim</label>
+            </div>
+
+            <div class="info-group">
+                <label>Possuí NFe Express:</label>
+                <label><input type="radio" id="nfeNao"> Não</label>
+                <label><input type="radio" id="nfeSim"> Sim</label>
+            </div>
+
+            <div class="info-group">
+                <label>Utiliza NGPonto:</label>
+                <label><input type="radio" id="pontoNao"> Não</label>
+                <label><input type="radio" id="pontoSim"> Sim</label>
+            </div>
+
+            <div class="info-group">
+                <label>Utiliza Holos/People:</label>
+                <label><input type="radio" id="holosNao"> Não</label>
+                <label><input type="radio" id="holosSim"> Sim</label>
+            </div>
+
+            <div class="info-group">
+                <label>Precisa de VPN:</label>
+                <label><input type="radio" id="vpnNao"> Não</label>
+                <label><input type="radio" id="vpnSim"> Sim</label>
+            </div>
+
+            <button id="downloadReportBtn">
+                Baixar Relatório (.txt)
+            </button>
+
         </div>
     </div>
 
