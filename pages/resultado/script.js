@@ -78,6 +78,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // Habilitar o botão de download após os dados serem carregados
         if (processButton) {
             processButton.addEventListener('click', () => {
+                // ANTES DE GERAR O RELATÓRIO, CHAME A FUNÇÃO DE VALIDAÇÃO
+                if (!validateMappingParameters()) {
+                    return; // Se a validação falhar, para a execução
+                }
+
                 // Coleta os dados dos campos de mapeamento preenchidos pelo usuário
                 const mappingData = getMappingParameters();
                 
@@ -106,26 +111,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Função para coletar os campos que o cliente Preenche
     function getMappingParameters() {
-        // Para radio buttons, pegue o valor associado ao radio selecionado
-        // Em vez de .id, vamos pegar o .value ou, se não houver, o texto visível.
-        // A melhor prática é dar um 'value' aos radio buttons que seja o texto que você quer ver no relatório.
-
-        // Exemplo:
-        // Se o seu HTML for <input type="radio" name="certificado" id="certificadoA1" value="A1"> A1</label>
-        // Use .value
-
-        // Se o seu HTML for <input type="radio" name="certificado" id="certificadoA1"> A1</label>
-        // Você precisaria pegar o texto do label associado, o que é mais complexo.
-        // A forma mais robusta é usar o `value` no input radio.
-        
         const getRadioValue = (name) => {
             const selectedRadio = document.querySelector(`input[name="${name}"]:checked`);
             if (selectedRadio) {
-                // Se o radio button tiver um 'value', use-o.
-                // Caso contrário, use o 'id' como fallback.
                 return selectedRadio.value || selectedRadio.id; 
             }
-            return 'N/A';
+            return ''; // Retorna string vazia para indicar que não foi selecionado
         };
 
         const certificado = getRadioValue('certificado');
@@ -136,8 +127,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const vpn = getRadioValue('vpn');
 
         // Para inputs de texto, .value.trim() está correto
-        const qtdUsuarios = document.getElementById('qtdUsuarios')?.value.trim() || 'N/A';
-        const codChamado = document.getElementById('codChamado')?.value.trim() || 'N/A';
+        const qtdUsuarios = document.getElementById('qtdUsuarios')?.value.trim();
+        const codChamado = document.getElementById('codChamado')?.value.trim();
 
         return {
             certificado,
@@ -149,6 +140,48 @@ document.addEventListener('DOMContentLoaded', function() {
             qtdUsuarios,
             codChamado
         };
+    }
+
+    // --- Nova função para validar os campos do mapeamento ---
+    function validateMappingParameters() {
+        const mappingData = getMappingParameters();
+        let missingFields = [];
+
+        // Verifica radio buttons
+        if (!mappingData.certificado) missingFields.push('Certificado Digital');
+        if (!mappingData.impressora) missingFields.push('Impressora Matricial');
+        if (!mappingData.nfe) missingFields.push('NFe Express');
+        if (!mappingData.ponto) missingFields.push('NGPonto');
+        if (!mappingData.holos) missingFields.push('Holos/People');
+        if (!mappingData.vpn) missingFields.push('VPN');
+
+        // Verifica campos de texto
+        if (!mappingData.qtdUsuarios) missingFields.push('Quantidade de Usuários');
+        if (!mappingData.codChamado) missingFields.push('Número do Chamado');
+
+        if (missingFields.length > 0) {
+            alert('Por favor, preencha os seguintes campos antes de prosseguir:\n\n- ' + missingFields.join('\n- '));
+            return false; // Validação falhou
+        }
+        return true; // Validação bem-sucedida
+    }
+
+    // --- Adicionar event listeners para os campos de texto aceitarem apenas números ---
+    const qtdUsuariosInput = document.getElementById('qtdUsuarios');
+    const codChamadoInput = document.getElementById('codChamado');
+
+    if (qtdUsuariosInput) {
+        qtdUsuariosInput.addEventListener('input', function(event) {
+            // Remove qualquer coisa que não seja dígito
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+    }
+
+    if (codChamadoInput) {
+        codChamadoInput.addEventListener('input', function(event) {
+            // Remove qualquer coisa que não seja dígito
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
     }
 
     // Opcional: Limpar a URL (comentado por padrão)
@@ -188,14 +221,14 @@ Velocidade de Upload(Aproximado): ${data.internetUploadSpeedMbps || 'N/A'} Mbps
 Velocidade de Download(Aproximado): ${data.internetDownloadSpeedMbps || 'N/A'} Mbps
 
 ## Parâmetros do Mapeamento
-Possui Impressora Matricial: ${data.impressora}
-Possui NFe Express: ${data.nfe}
-Utiliza NGPonto: ${data.ponto}
-Utiliza Holos/People: ${data.holos}
-Precisa de VPN: ${data.vpn}
-Certificado Digital: ${data.certificado}
-Quantidade de Usuários para acesso: ${data.qtdUsuarios}
-Número do Chamado: ${data.codChamado}
+Possui Impressora Matricial: ${data.impressora || 'N/A'}
+Possui NFe Express: ${data.nfe || 'N/A'}
+Utiliza NGPonto: ${data.ponto || 'N/A'}
+Utiliza Holos/People: ${data.holos || 'N/A'}
+Precisa de VPN: ${data.vpn || 'N/A'}
+Certificado Digital: ${data.certificado || 'N/A'}
+Quantidade de Usuários para acesso: ${data.qtdUsuarios || 'N/A'}
+Número do Chamado: ${data.codChamado || 'N/A'}
 --------------------------------------------------
 `;
         return report;
