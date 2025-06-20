@@ -240,33 +240,33 @@ document.addEventListener('DOMContentLoaded', function() {
         rec.sqlServerVersionRecomendado = recommendedSqlServerVersion;
 
 
-        // --- Determinação do Tipo de Servidor (com hierarquia) ---
+        // --- Determinação do Tipo de Servidor (com nova hierarquia: Micro -> IaaS Cloud -> NG Start) ---
 
-        // 1. Tentar NG Start
-        if (sqlMaiorBancoBaseMB <= FOUR_POINT_FIVE_GB_MB || // Banco <= 4.5GB
-            mediaXMLmensal >= 1000 || // XML Mensal >= 1000
-            mediaXMLmensalVarejista <= 1000 || // XML Mensal Varejista <= 1000
-            qtdUsuarios <= 3) { // Usuários <= 3
-            rec.tipoServidor = 'NG Start';
+        // 1. Tentar Micro (prioridade mais alta)
+        if (sqlMaiorBancoBaseMB > TEN_GB_MB || 
+            mediaXMLmensal > 10000 || 
+            mediaXMLmensalVarejista > 10000 || 
+            qtdUsuarios >= 7 || 
+            data.impressora === 'Sim' || 
+            data.nfe === 'Sim' || 
+            data.ponto === 'Sim' || 
+            data.vpn === 'Sim' || 
+            data.certificado === 'A3') { 
+            rec.tipoServidor = 'Micro';
         }
-        // 2. Tentar IaaS Cloud (se não for NG Start)
-        else if (sqlMaiorBancoBaseMB >= TEN_GB_MB || // Banco >= 10GB
-                 mediaXMLmensal >= 10000 || // XML Mensal >= 10000
-                 mediaXMLmensalVarejista >= 10000 || // XML Mensal Varejista >= 10000
-                 qtdUsuarios <= 6) { // Usuários <= 6
+        // 2. Tentar IaaS Cloud (se não for Micro)
+        else if (sqlMaiorBancoBaseMB >= TEN_GB_MB || 
+                 mediaXMLmensal >= 10000 || 
+                 mediaXMLmensalVarejista >= 10000 || 
+                 qtdUsuarios <= 6) { 
             rec.tipoServidor = 'IaaS Cloud';
         }
-        // 3. Tentar Micro (se não for NG Start nem IaaS Cloud)
-        else if (sqlMaiorBancoBaseMB > TEN_GB_MB || 
-                 mediaXMLmensal > 10000 || 
-                 mediaXMLmensalVarejista > 10000 || 
-                 qtdUsuarios >= 7 || 
-                 data.impressora === 'Sim' || 
-                 data.nfe === 'Sim' || 
-                 data.ponto === 'Sim' || 
-                 data.vpn === 'Sim' || 
-                 data.certificado === 'A3') { 
-            rec.tipoServidor = 'Micro';
+        // 3. Tentar NG Start (se não for Micro nem IaaS Cloud)
+        else if (sqlMaiorBancoBaseMB <= FOUR_POINT_FIVE_GB_MB || 
+                 mediaXMLmensal >= 1000 || 
+                 mediaXMLmensalVarejista <= 1000 || 
+                 qtdUsuarios <= 3) { 
+            rec.tipoServidor = 'NG Start';
         } else {
             rec.tipoServidor = 'Não classificado';
             rec.observacoes += 'Não foi possível classificar o tipo de servidor com as regras fornecidas. ';
@@ -328,8 +328,9 @@ document.addEventListener('DOMContentLoaded', function() {
             rec.memoriaRamTotalMinimo = `${sqlMin + windowsMinVal + usuariosMin + currentHolosBotMin} MB`;
             rec.memoriaRamTotalRecomendado = `${sqlRec + windowsRecVal + usuariosRec + currentHolosBotRec} MB`;
 
-        } else {
-            // Se não for tipo Micro, os cálculos específicos de vCPU e RAM (SQL, Usuários, BOT) não se aplicam
+        } else if (rec.tipoServidor === 'IaaS Cloud' || rec.tipoServidor === 'NG Start') {
+            // Para IaaS Cloud e NG Start, vamos definir os valores de RAM e vCPU como 'N/A'
+            // já que você só pediu cálculos específicos para 'Micro'.
             rec.vCPUMinimo = 'N/A';
             rec.vCPURecomendado = 'N/A';
             rec.sqlServerMinimo = 'N/A';
@@ -340,9 +341,11 @@ document.addEventListener('DOMContentLoaded', function() {
             rec.botRecomendado = null; 
             rec.memoriaRamTotalMinimo = 'N/A';
             rec.memoriaRamTotalRecomendado = 'N/A';
-            rec.windowsMinimo = 'N/A'; // Windows RAM também se torna N/A se não for Micro
-            rec.windowsRecomendado = 'N/A'; // Windows RAM também se torna N/A se não for Micro
+            rec.windowsMinimo = 'N/A'; 
+            rec.windowsRecomendado = 'N/A'; 
         }
+        // Se for "Não classificado", os valores já estão como 'N/A' (ou null para BOT) no início do rec,
+        // então não precisamos de um 'else' adicional aqui.
 
         return rec;
     }
