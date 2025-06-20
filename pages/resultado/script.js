@@ -256,15 +256,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         // 2. Tentar NG Start (se não for Micro)
         else if (sqlMaiorBancoBaseMB <= FOUR_POINT_FIVE_GB_MB || 
-                 mediaXMLmensal >= 1000 || 
+                 mediaXMLmensal <= 1000 || 
                  mediaXMLmensalVarejista <= 1000 || 
                  qtdUsuarios <= 3) { 
             rec.tipoServidor = 'NG Start';
         }
         // 3. Tentar IaaS Cloud (se não for Micro nem NG Start)
         else if (sqlMaiorBancoBaseMB >= TEN_GB_MB || 
-                 mediaXMLmensal >= 10000 || 
-                 mediaXMLmensalVarejista >= 10000 || 
+                 mediaXMLmensal <= 10000 || 
+                 mediaXMLmensalVarejista <= 10000 || 
                  qtdUsuarios <= 6) { 
             rec.tipoServidor = 'IaaS Cloud';
         } else {
