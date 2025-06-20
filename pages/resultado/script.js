@@ -240,33 +240,33 @@ document.addEventListener('DOMContentLoaded', function() {
         rec.sqlServerVersionRecomendado = recommendedSqlServerVersion;
 
 
-        // --- Determinação do Tipo de Servidor (com nova hierarquia: Micro -> IaaS Cloud -> NG Start) ---
+        // --- Determinação do Tipo de Servidor (com nova hierarquia: Micro -> NG Start -> IaaS Cloud) ---
 
-        // 1. Tentar Micro (prioridade mais alta) - Mantém ||
-        if (sqlMaiorBancoBaseMB > TEN_GB_MB ||
-            mediaXMLmensal > 10000 ||
-            mediaXMLmensalVarejista > 10000 ||
-            qtdUsuarios >= 7 ||
-            data.impressora === 'Sim' ||
-            data.nfe === 'Sim' ||
-            data.ponto === 'Sim' ||
-            data.vpn === 'Sim' ||
-            data.certificado === 'A3') {
+        // 1. Tentar Micro (prioridade mais alta)
+        if (sqlMaiorBancoBaseMB > TEN_GB_MB || 
+            mediaXMLmensal > 10000 || 
+            mediaXMLmensalVarejista > 10000 || 
+            qtdUsuarios >= 7 || 
+            data.impressora === 'Sim' || 
+            data.nfe === 'Sim' || 
+            data.ponto === 'Sim' || 
+            data.vpn === 'Sim' || 
+            data.certificado === 'A3') { 
             rec.tipoServidor = 'Micro';
         }
-        // 2. Tentar IaaS Cloud (se não for Micro) - Mantém ||
-        else if (sqlMaiorBancoBaseMB >= TEN_GB_MB ||
-                 mediaXMLmensal >= 10000 ||
-                 mediaXMLmensalVarejista >= 10000 ||
-                 qtdUsuarios <= 6) {
-            rec.tipoServidor = 'IaaS Cloud';
-        }
-        // 3. Tentar NG Start (se não for Micro nem IaaS Cloud) - Volta para &&
-        else if (sqlMaiorBancoBaseMB <= FOUR_POINT_FIVE_GB_MB && // AGORA É 'E'
-                 mediaXMLmensal >= 1000 && // AGORA É 'E'
-                 mediaXMLmensalVarejista <= 1000 && // AGORA É 'E'
-                 qtdUsuarios <= 3) { // AGORA É 'E'
+        // 2. Tentar NG Start (se não for Micro)
+        else if (sqlMaiorBancoBaseMB <= FOUR_POINT_FIVE_GB_MB || 
+                 mediaXMLmensal >= 1000 || 
+                 mediaXMLmensalVarejista <= 1000 || 
+                 qtdUsuarios <= 3) { 
             rec.tipoServidor = 'NG Start';
+        }
+        // 3. Tentar IaaS Cloud (se não for Micro nem NG Start)
+        else if (sqlMaiorBancoBaseMB >= TEN_GB_MB || 
+                 mediaXMLmensal >= 10000 || 
+                 mediaXMLmensalVarejista >= 10000 || 
+                 qtdUsuarios <= 6) { 
+            rec.tipoServidor = 'IaaS Cloud';
         } else {
             rec.tipoServidor = 'Não classificado';
             rec.observacoes += 'Não foi possível classificar o tipo de servidor com as regras fornecidas. ';
