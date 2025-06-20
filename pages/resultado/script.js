@@ -276,8 +276,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
         if (rec.tipoServidor === 'Micro') {
-            rec.vCPUMinimo = (qtdUsuarios * 2.5).toFixed(0); // Arredonda para inteiro
-            rec.vCPURecomendado = (qtdUsuarios * 3.5).toFixed(0); // Arredonda para inteiro
+            rec.vCPUMinimo = (qtdUsuarios / 2.5).toFixed(0); // Arredonda para inteiro
+            rec.vCPURecomendado = (qtdUsuarios / 3.5).toFixed(0); // Arredonda para inteiro
 
             sqlMin = 3584 + (qtdUsuarios * 384);
             sqlRec = 3584 + (qtdUsuarios * 768);
