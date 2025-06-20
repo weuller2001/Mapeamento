@@ -206,12 +206,12 @@ document.addEventListener('DOMContentLoaded', function() {
             vCPURecomendado: 'N/A',
             sqlServerMinimo: 'N/A',
             sqlServerRecomendado: 'N/A',
-            windowsMinimo: '4096 MB', // Definido como constante
-            windowsRecomendado: '4096 MB', // Definido como constante
+            windowsMinimo: '4096 MB', 
+            windowsRecomendado: '4096 MB', 
             usuariosMinimo: 'N/A',
             usuariosRecomendado: 'N/A',
-            botMinimo: 'N/A', // Agora vinculado a Holos
-            botRecomendado: 'N/A', // Agora vinculado a Holos
+            botMinimo: 'N/A', 
+            botRecomendado: 'N/A', 
             memoriaRamTotalMinimo: 'N/A',
             memoriaRamTotalRecomendado: 'N/A',
             sqlServerVersionMinimo: 'N/A',
@@ -227,33 +227,32 @@ document.addEventListener('DOMContentLoaded', function() {
         const qtdUsuarios = parseInt(data.qtdUsuarios) || 0;
 
         // Limites em MB para comparações
-        const TEN_GB_MB = 10 * 1024; 
-        const FOUR_POINT_FIVE_GB_MB = 4.5 * 1024;
-        const SEVEN_POINT_ONE_SIX_EIGHT_GB_MB = 7.168 * 1024;
-
+        const TEN_GB_MB = 10 * 1024; // 10 GB em MB = 10240 MB
+        const FOUR_POINT_FIVE_GB_MB = 4.5 * 1024; // 4.5 GB em MB = 4608 MB
+        const SEVEN_POINT_ONE_SIX_EIGHT_GB_MB = 7.168 * 1024; // 7168 MB = 7.00 GB
 
         // --- Determinação do Tipo de Servidor ---
-        // Regra: Micro
-        if (sqlMaiorBancoBaseMB > TEN_GB_MB && // Se tiver um banco na base maior que 10gb
-            mediaXMLmensal > 10000 && // Se a média de xml mensal for maior que 10000
-            mediaXMLmensalVarejista > 10000 && // Se a média de xml mensal varejista for maior que 10000
-            qtdUsuarios >= 7 && // Se a quantidade de usuários for igual ou maior que 7
-            data.impressora === 'Sim' && // Se tiver impressão matricial
-            data.nfe === 'Sim' && // Se tiver nfe
-            data.ponto === 'Sim' && // Se tiver NGPonto
-            data.holos === 'Sim' && // Se tiver Holos/People (BOT)
-            data.vpn === 'Sim' && // Se tiver VPN
+        // Regra: Micro (se UMA das condições for verdadeira)
+        if (sqlMaiorBancoBaseMB > TEN_GB_MB || // Se tiver um banco na base maior que 10gb
+            mediaXMLmensal > 10000 || // Se a média de xml mensal for maior que 10000
+            mediaXMLmensalVarejista > 10000 || // Se a média de xml mensal varejista for maior que 10000
+            qtdUsuarios >= 7 || // Se a quantidade de usuários for igual ou maior que 7
+            data.impressora === 'Sim' || // Se tiver impressão matricial
+            data.nfe === 'Sim' || // Se tiver nfe
+            data.ponto === 'Sim' || // Se tiver NGPonto
+            data.holos === 'Sim' || // Se tiver Holos/People
+            data.vpn === 'Sim' || // Se tiver VPN
             data.certificado === 'A3') { // Se tiver certificado A3
             rec.tipoServidor = 'Micro';
         }
-        // Regra: IaaS Cloud
+        // Regra: IaaS Cloud (TODAS as condições devem ser verdadeiras)
         else if (sqlMaiorBancoBaseMB >= TEN_GB_MB &&
                  mediaXMLmensal >= 10000 &&
                  mediaXMLmensalVarejista >= 10000 &&
                  qtdUsuarios <= 6) {
             rec.tipoServidor = 'IaaS Cloud';
         }
-        // Regra: NG Start
+        // Regra: NG Start (TODAS as condições devem ser verdadeiras)
         else if (sqlMaiorBancoBaseMB <= FOUR_POINT_FIVE_GB_MB &&
                  mediaXMLmensal >= 1000 &&
                  mediaXMLmensalVarejista <= 1000 &&
