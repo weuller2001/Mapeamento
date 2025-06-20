@@ -220,7 +220,6 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         // Parse de valores numéricos, garantindo que sejam números
-        // collectedDataForReport já armazena em MB, então não precisamos * 1024 aqui.
         const sqlMaiorBancoBaseMB = parseFloat(data.sqlMaiorBancoBaseMB) || 0;
         const mediaXMLmensal = parseFloat(data.mediaXMLmensal) || 0;
         const mediaXMLmensalVarejista = parseFloat(data.mediaXMLmensalVarejista) || 0;
@@ -280,10 +279,17 @@ document.addEventListener('DOMContentLoaded', function() {
             rec.vCPUMinimo = Math.ceil(qtdUsuarios * 2.5); 
             rec.vCPURecomendado = Math.ceil(qtdUsuarios * 3.5);
 
-            sqlMin = 3584 + (qtdUsuarios * 384);
-            sqlRec = 3584 + (qtdUsuarios * 768);
+            // Lógica de cálculo de SQL Server RAM
+            if (qtdUsuarios > 6) {
+                sqlMin = 3584 + ((qtdUsuarios - 6) * 384);
+                sqlRec = 3584 + ((qtdUsuarios - 6) * 768);
+            } else {
+                sqlMin = 3584;
+                sqlRec = 3584;
+            }
             rec.sqlServerMinimo = `${sqlMin} MB`;
             rec.sqlServerRecomendado = `${sqlRec} MB`;
+
 
             usuariosMin = qtdUsuarios * 640;
             usuariosRec = qtdUsuarios * 1024;
