@@ -233,16 +233,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // --- Determinação do Tipo de Servidor ---
         // Regra: Micro (se UMA das condições for verdadeira)
-        if (sqlMaiorBancoBaseMB > TEN_GB_MB || // Se tiver um banco na base maior que 10gb
-            mediaXMLmensal > 10000 || // Se a média de xml mensal for maior que 10000
-            mediaXMLmensalVarejista > 10000 || // Se a média de xml mensal varejista for maior que 10000
-            qtdUsuarios >= 7 || // Se a quantidade de usuários for igual ou maior que 7
-            data.impressora === 'Sim' || // Se tiver impressão matricial
-            data.nfe === 'Sim' || // Se tiver nfe
-            data.ponto === 'Sim' || // Se tiver NGPonto
-            data.holos === 'Sim' || // Se tiver Holos/People
-            data.vpn === 'Sim' || // Se tiver VPN
-            data.certificado === 'A3') { // Se tiver certificado A3
+        if (sqlMaiorBancoBaseMB > TEN_GB_MB || 
+            mediaXMLmensal > 10000 || 
+            mediaXMLmensalVarejista > 10000 || 
+            qtdUsuarios >= 7 || 
+            data.impressora === 'Sim' || 
+            data.nfe === 'Sim' || 
+            data.ponto === 'Sim' || 
+            data.holos === 'Sim' || 
+            data.vpn === 'Sim' || 
+            data.certificado === 'A3') { 
             rec.tipoServidor = 'Micro';
         }
         // Regra: IaaS Cloud (TODAS as condições devem ser verdadeiras)
@@ -276,8 +276,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
         if (rec.tipoServidor === 'Micro') {
-            rec.vCPUMinimo = (qtdUsuarios / 3.5).toFixed(0); // Arredonda para inteiro
-            rec.vCPURecomendado = (qtdUsuarios / 2.5).toFixed(0); // Arredonda para inteiro
+            // Arredonda para cima usando Math.ceil()
+            rec.vCPUMinimo = Math.ceil(qtdUsuarios * 2.5); 
+            rec.vCPURecomendado = Math.ceil(qtdUsuarios * 3.5);
 
             sqlMin = 3584 + (qtdUsuarios * 384);
             sqlRec = 3584 + (qtdUsuarios * 768);
@@ -296,13 +297,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 rec.botMinimo = `${holosBotMin} MB`;
                 rec.botRecomendado = `${holosBotRec} MB`;
             } else {
-                rec.botMinimo = 'N/A (Holos/People não selecionado)';
-                rec.botRecomendado = 'N/A (Holos/People não selecionado)';
+                // Se Holos não for "Sim", defina os valores como null para não exibir no relatório
+                rec.botMinimo = null; 
+                rec.botRecomendado = null;
             }
 
             // Memória RAM Total (usando os valores numéricos)
-            rec.memoriaRamTotalMinimo = `${sqlMin + windowsMinVal + usuariosMin + holosBotMin} MB`;
-            rec.memoriaRamTotalRecomendado = `${sqlRec + windowsRecVal + usuariosRec + holosBotRec} MB`;
+            // A soma só inclui BOT se ele for relevante
+            const currentHolosBotMin = (data.holos === 'Sim' ? holosBotMin : 0);
+            const currentHolosBotRec = (data.holos === 'Sim' ? holosBotRec : 0);
+
+            rec.memoriaRamTotalMinimo = `${sqlMin + windowsMinVal + usuariosMin + currentHolosBotMin} MB`;
+            rec.memoriaRamTotalRecomendado = `${sqlRec + windowsRecVal + usuariosRec + currentHolosBotRec} MB`;
 
         } else {
             // Limpa os campos se não for tipo Micro
@@ -312,12 +318,12 @@ document.addEventListener('DOMContentLoaded', function() {
             rec.sqlServerRecomendado = 'N/A';
             rec.usuariosMinimo = 'N/A';
             rec.usuariosRecomendado = 'N/A';
-            rec.botMinimo = 'N/A'; // N/A se não for Micro
-            rec.botRecomendado = 'N/A'; // N/A se não for Micro
+            rec.botMinimo = null; // Definido como null para não exibir
+            rec.botRecomendado = null; // Definido como null para não exibir
             rec.memoriaRamTotalMinimo = 'N/A';
             rec.memoriaRamTotalRecomendado = 'N/A';
-            rec.windowsMinimo = 'N/A'; // N/A se não for Micro
-            rec.windowsRecomendado = 'N/A'; // N/A se não for Micro
+            rec.windowsMinimo = 'N/A'; 
+            rec.windowsRecomendado = 'N/A'; 
         }
 
         // --- Versão do SQL Server (baseado em sqlMaiorBancoBaseMB) ---
@@ -389,7 +395,7 @@ Distribuição da RAM:
   SQL Server: ${recommendations.sqlServerMinimo}
   Windows: ${recommendations.windowsMinimo}
   Usuários: ${recommendations.usuariosMinimo}
-  BOT (Holos/People): ${recommendations.botMinimo}
+${recommendations.botMinimo !== null ? `  BOT (Holos/People): ${recommendations.botMinimo}` : ''}
 Memória RAM Total: ${recommendations.memoriaRamTotalMinimo}
 Versão do SQL Server: ${recommendations.sqlServerVersionMinimo}
 
@@ -400,7 +406,7 @@ Distribuição da RAM:
   SQL Server: ${recommendations.sqlServerRecomendado}
   Windows: ${recommendations.windowsRecomendado}
   Usuários: ${recommendations.usuariosRecomendado}
-  BOT (Holos/People): ${recommendations.botRecomendado}
+${recommendations.botRecomendado !== null ? `  BOT (Holos/People): ${recommendations.botRecomendado}` : ''}
 Memória RAM Total: ${recommendations.memoriaRamTotalRecomendado}
 Versão do SQL Server: ${recommendations.sqlServerVersionRecomendado}
 
