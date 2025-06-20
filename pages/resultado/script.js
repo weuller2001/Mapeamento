@@ -23,16 +23,26 @@ document.addEventListener('DOMContentLoaded', function() {
             let displayValue = value;
             if (id.includes('MB') || id.includes('GB') || id.includes('Mbps') || id.includes('cpuMultiCoreScore')) {
                 // Esta substituição é para exibição e para que parseFloat funcione se necessário
-                displayValue = value.replace(',', '.'); 
+                // Convertendo GB para MB para facilitar comparações numéricas
+                if (id.includes('sqlMaiorBancoBaseMB') || id.includes('sqlTotalBancoBaseMB') || id.includes('totalRamGB') || id.includes('diskTotalGB')) {
+                    displayValue = (parseFloat(value.replace(',', '.')) * 1024).toFixed(2); // Convertendo GB para MB
+                } else {
+                    displayValue = value.replace(',', '.'); 
+                }
             }
             
             // Atribui o valor decodificado e tratado para o elemento na página
             const element = document.getElementById(id);
             if (element) {
-                element.textContent = displayValue + suffix;
+                // Para exibição, se for GB, converte de volta ou adiciona o sufixo original
+                if (id.includes('sqlMaiorBancoBaseMB') || id.includes('sqlTotalBancoBaseMB') || id.includes('totalRamGB') || id.includes('diskTotalGB')) {
+                     element.textContent = (parseFloat(displayValue) / 1024).toFixed(2) + suffix; // Exibe em GB novamente
+                } else {
+                    element.textContent = displayValue + suffix;
+                }
                 dataFound = true;
-                // Armazena o valor decodificado e formatado para uso no relatório
-                collectedDataForReport[paramName] = displayValue;
+                // Armazena o valor NUMÉRICO tratado para uso no relatório e cálculos
+                collectedDataForReport[paramName] = parseFloat(displayValue);
             }
         } else { // Se o parâmetro não existe na URL
             const element = document.getElementById(id);
@@ -52,19 +62,19 @@ document.addEventListener('DOMContentLoaded', function() {
     fillElement('funcionariosEmpresaTotal', 'funcionariosEmpresaTotal');
     fillElement('mediaXMLmensal', 'mediaXMLmensal');
     fillElement('mediaXMLmensalVarejista', 'mediaXMLmensalVarejista');
-    fillElement('sqlMaiorBancoBaseMB', 'sqlMaiorBancoBaseMB', ' GB');
-    fillElement('sqlTotalBancoBaseMB', 'sqlTotalBancoBaseMB', ' GB');
+    fillElement('sqlMaiorBancoBaseMB', 'sqlMaiorBancoBaseMB', ' GB'); // Agora armazena em MB, mas exibe em GB
+    fillElement('sqlTotalBancoBaseMB', 'sqlTotalBancoBaseMB', ' GB'); // Agora armazena em MB, mas exibe em GB
     fillElement('windowsVersion', 'windowsVersion');
     fillElement('sqlVersion', 'sqlVersion');
     fillElement('processorName', 'processorName');
     fillElement('coreCount', 'coreCount');
-    fillElement('totalRamGB', 'totalRamGB', ' GB');
+    fillElement('totalRamGB', 'totalRamGB', ' GB'); // Agora armazena em MB, mas exibe em GB
     fillElement('sqlRamDisplay', 'sqlRamDisplay');
     fillElement('connectionType', 'connectionType');
     fillElement('diskReadSpeedMBps', 'diskReadSpeedMBps', ' MB/s');
     fillElement('diskWriteSpeedMBps', 'diskWriteSpeedMBps', ' MB/s');
     fillElement('diskType', 'diskType');
-    fillElement('diskTotalGB', 'diskTotalGB', ' GB');
+    fillElement('diskTotalGB', 'diskTotalGB', ' GB'); // Agora armazena em MB, mas exibe em GB
     fillElement('cpuMultiCoreScore', 'cpuMultiCoreScore');
     fillElement('internetUploadSpeedMbps', 'internetUploadSpeedMbps', ' Mbps');
     fillElement('internetDownloadSpeedMbps', 'internetDownloadSpeedMbps', ' Mbps');
@@ -89,7 +99,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Combina os dados da URL com os dados do mapeamento para o relatório final
                 const finalReportData = { ...collectedDataForReport, ...mappingData };
 
-                const reportText = generateReportText(finalReportData);
+                // Calcula as recomendações
+                const recommendations = calculateRecommendations(finalReportData);
+
+                const reportText = generateReportText(finalReportData, recommendations); // Passa as recomendações também
                 const blob = new Blob([reportText], { type: 'text/plain' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -123,11 +136,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const impressora = getRadioValue('impressora');
         const nfe = getRadioValue('nfe');
         const ponto = getRadioValue('ponto');
-        const holos = getRadioValue('holos');
+        const holos = getRadioValue('holos'); // Este é o campo que será usado para a lógica do "BOT"
         const vpn = getRadioValue('vpn');
-
+        
         // Para inputs de texto, .value.trim() está correto
-        const qtdUsuarios = document.getElementById('qtdUsuarios')?.value.trim();
+        const qtdUsuarios = parseInt(document.getElementById('qtdUsuarios')?.value.trim()) || 0; // Converte para número inteiro, 0 se vazio
         const codChamado = document.getElementById('codChamado')?.value.trim();
 
         return {
@@ -135,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function() {
             impressora,
             nfe,
             ponto,
-            holos,
+            holos, // Manter como 'holos'
             vpn,
             qtdUsuarios,
             codChamado
@@ -156,7 +169,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!mappingData.vpn) missingFields.push('VPN');
 
         // Verifica campos de texto
-        if (!mappingData.qtdUsuarios) missingFields.push('Quantidade de Usuários');
+        // Note: qtdUsuarios já é 0 se estiver vazio, então a validação aqui é se é > 0
+        if (mappingData.qtdUsuarios === 0) missingFields.push('Quantidade de Usuários');
         if (!mappingData.codChamado) missingFields.push('Número do Chamado');
 
         if (missingFields.length > 0) {
@@ -184,11 +198,147 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // --- Nova função para calcular as recomendações ---
+    function calculateRecommendations(data) {
+        const rec = {
+            tipoServidor: 'N/A',
+            vCPUMinimo: 'N/A',
+            vCPURecomendado: 'N/A',
+            sqlServerMinimo: 'N/A',
+            sqlServerRecomendado: 'N/A',
+            windowsMinimo: '4096 MB', // Definido como constante
+            windowsRecomendado: '4096 MB', // Definido como constante
+            usuariosMinimo: 'N/A',
+            usuariosRecomendado: 'N/A',
+            botMinimo: 'N/A', // Agora vinculado a Holos
+            botRecomendado: 'N/A', // Agora vinculado a Holos
+            memoriaRamTotalMinimo: 'N/A',
+            memoriaRamTotalRecomendado: 'N/A',
+            sqlServerVersionMinimo: 'N/A',
+            sqlServerVersionRecomendado: 'N/A',
+            observacoes: ''
+        };
+
+        // Parse de valores numéricos, garantindo que sejam números
+        // collectedDataForReport já armazena em MB, então não precisamos * 1024 aqui.
+        const sqlMaiorBancoBaseMB = parseFloat(data.sqlMaiorBancoBaseMB) || 0;
+        const mediaXMLmensal = parseFloat(data.mediaXMLmensal) || 0;
+        const mediaXMLmensalVarejista = parseFloat(data.mediaXMLmensalVarejista) || 0;
+        const qtdUsuarios = parseInt(data.qtdUsuarios) || 0;
+
+        // Limites em MB para comparações
+        const TEN_GB_MB = 10 * 1024; 
+        const FOUR_POINT_FIVE_GB_MB = 4.5 * 1024;
+        const SEVEN_POINT_ONE_SIX_EIGHT_GB_MB = 7.168 * 1024;
+
+
+        // --- Determinação do Tipo de Servidor ---
+        // Regra: Micro
+        if (sqlMaiorBancoBaseMB > TEN_GB_MB &&
+            mediaXMLmensal > 10000 &&
+            mediaXMLmensalVarejista > 10000 &&
+            qtdUsuarios >= 7 &&
+            data.impressora === 'Sim' &&
+            data.nfe === 'Sim' &&
+            data.ponto === 'Sim' &&
+            data.holos === 'Sim' && // Holos é o "BOT" aqui
+            data.vpn === 'Sim' &&
+            data.certificado === 'A3') {
+            rec.tipoServidor = 'Micro';
+        }
+        // Regra: IaaS Cloud
+        else if (sqlMaiorBancoBaseMB >= TEN_GB_MB &&
+                 mediaXMLmensal >= 10000 &&
+                 mediaXMLmensalVarejista >= 10000 &&
+                 qtdUsuarios <= 6) {
+            rec.tipoServidor = 'IaaS Cloud';
+        }
+        // Regra: NG Start
+        else if (sqlMaiorBancoBaseMB <= FOUR_POINT_FIVE_GB_MB &&
+                 mediaXMLmensal >= 1000 &&
+                 mediaXMLmensalVarejista <= 1000 &&
+                 qtdUsuarios <= 3) {
+            rec.tipoServidor = 'NG Start';
+        } else {
+            rec.tipoServidor = 'Não classificado'; // Caso não caia em nenhuma das regras
+            rec.observacoes += 'Não foi possível classificar o tipo de servidor com as regras fornecidas. ';
+        }
+
+
+        // --- Cálculos Condicionais para Tipo de Servidor "Micro" ---
+        let sqlMin = 0;
+        let sqlRec = 0;
+        let usuariosMin = 0;
+        let usuariosRec = 0;
+        let holosBotMin = 0; // Usando holosBot para o cálculo
+        let holosBotRec = 0; // Usando holosBot para o cálculo
+        const windowsMinVal = 4096; // Valor numérico para cálculo
+        const windowsRecVal = 4096; // Valor numérico para cálculo
+
+
+        if (rec.tipoServidor === 'Micro') {
+            rec.vCPUMinimo = (qtdUsuarios * 2.5).toFixed(0); // Arredonda para inteiro
+            rec.vCPURecomendado = (qtdUsuarios * 3.5).toFixed(0); // Arredonda para inteiro
+
+            sqlMin = 3584 + (qtdUsuarios * 384);
+            sqlRec = 3584 + (qtdUsuarios * 768);
+            rec.sqlServerMinimo = `${sqlMin} MB`;
+            rec.sqlServerRecomendado = `${sqlRec} MB`;
+
+            usuariosMin = qtdUsuarios * 640;
+            usuariosRec = qtdUsuarios * 1024;
+            rec.usuariosMinimo = `${usuariosMin} MB`;
+            rec.usuariosRecomendado = `${usuariosRec} MB`;
+
+            // Lógica para "BOT" baseada em Holos/People
+            if (data.holos === 'Sim') { 
+                holosBotMin = 2048;
+                holosBotRec = 2048;
+                rec.botMinimo = `${holosBotMin} MB`;
+                rec.botRecomendado = `${holosBotRec} MB`;
+            } else {
+                rec.botMinimo = 'N/A (Holos/People não selecionado)';
+                rec.botRecomendado = 'N/A (Holos/People não selecionado)';
+            }
+
+            // Memória RAM Total (usando os valores numéricos)
+            rec.memoriaRamTotalMinimo = `${sqlMin + windowsMinVal + usuariosMin + holosBotMin} MB`;
+            rec.memoriaRamTotalRecomendado = `${sqlRec + windowsRecVal + usuariosRec + holosBotRec} MB`;
+
+        } else {
+            // Limpa os campos se não for tipo Micro
+            rec.vCPUMinimo = 'N/A';
+            rec.vCPURecomendado = 'N/A';
+            rec.sqlServerMinimo = 'N/A';
+            rec.sqlServerRecomendado = 'N/A';
+            rec.usuariosMinimo = 'N/A';
+            rec.usuariosRecomendado = 'N/A';
+            rec.botMinimo = 'N/A'; // N/A se não for Micro
+            rec.botRecomendado = 'N/A'; // N/A se não for Micro
+            rec.memoriaRamTotalMinimo = 'N/A';
+            rec.memoriaRamTotalRecomendado = 'N/A';
+            rec.windowsMinimo = 'N/A'; // N/A se não for Micro
+            rec.windowsRecomendado = 'N/A'; // N/A se não for Micro
+        }
+
+        // --- Versão do SQL Server (baseado em sqlMaiorBancoBaseMB) ---
+        // Estas regras não dependem do tipo de servidor.
+        if (sqlMaiorBancoBaseMB > SEVEN_POINT_ONE_SIX_EIGHT_GB_MB) { // 7168 MB equivale a 7 GB
+            rec.sqlServerVersionMinimo = 'Web';
+            rec.sqlServerVersionRecomendado = 'Web';
+        } else {
+            rec.sqlServerVersionMinimo = 'Express';
+            rec.sqlServerVersionRecomendado = 'Express';
+        }
+
+        return rec;
+    }
+
     // Opcional: Limpar a URL (comentado por padrão)
     // history.replaceState({}, document.title, window.location.pathname);
 
     // --- Função para gerar o texto do relatório ---
-    function generateReportText(data) {
+    function generateReportText(data, recommendations) {
         let report = `--- Relatório de Diagnóstico de Sistema e SQL ---
 Data da Coleta: ${new Date().toLocaleString()}
 
@@ -201,21 +351,21 @@ Maior Quadro de Funcionários: ${data.funcionariosEmpresaMaior || 'N/A'}
 Total de Funcionários da Base: ${data.funcionariosEmpresaTotal || 'N/A'}
 Média XML Mensal: ${data.mediaXMLmensal || 'N/A'}
 Média XML Mensal(Varejista): ${data.mediaXMLmensalVarejista || 'N/A'}
-Maior Banco de Dados: ${data.sqlMaiorBancoBaseMB || 'N/A'} GB
-Tamanho Total da Base: ${data.sqlTotalBancoBaseMB || 'N/A'} GB
+Maior Banco de Dados: ${(data.sqlMaiorBancoBaseMB / 1024).toFixed(2) || 'N/A'} GB
+Tamanho Total da Base: ${(data.sqlTotalBancoBaseMB / 1024).toFixed(2) || 'N/A'} GB
 
 ## Dados do Ambiente (SO, Hardware e SQL Server)
 Versão do Windows: ${data.windowsVersion || 'N/A'}
 Versão do SQL Server: ${data.sqlVersion || 'N/A'}
 Nome do Processador: ${data.processorName || 'N/A'}
 Número de Cores/Núcleos: ${data.coreCount || 'N/A'}
-RAM Total: ${data.totalRamGB || 'N/A'} GB
+RAM Total: ${(data.totalRamGB / 1024).toFixed(2) || 'N/A'} GB
 RAM Alocada para SQL Server: ${data.sqlRamDisplay || 'N/A'}
 Tipo de Conexão: ${data.connectionType || 'N/A'}
 Velocidade de Leitura de Disco: ${data.diskReadSpeedMBps || 'N/A'} MB/s
 Velocidade de Escrita de Disco: ${data.diskWriteSpeedMBps || 'N/A'} MB/s
 Tipo de Disco: ${data.diskType || 'N/A'}
-Tamanho Total do Disco: ${data.diskTotalGB || 'N/A'} GB
+Tamanho Total do Disco: ${(data.diskTotalGB / 1024).toFixed(2) || 'N/A'} GB
 Pontuação CPU Multi-core: ${data.cpuMultiCoreScore || 'N/A'}
 Velocidade de Upload(Aproximado): ${data.internetUploadSpeedMbps || 'N/A'} Mbps
 Velocidade de Download(Aproximado): ${data.internetDownloadSpeedMbps || 'N/A'} Mbps
@@ -229,6 +379,33 @@ Precisa de VPN: ${data.vpn || 'N/A'}
 Certificado Digital: ${data.certificado || 'N/A'}
 Quantidade de Usuários para acesso: ${data.qtdUsuarios || 'N/A'}
 Número do Chamado: ${data.codChamado || 'N/A'}
+
+
+## Resultado do mapeamento
+
+### Ambiente Minimo:
+Tipo de Servidor: ${recommendations.tipoServidor}
+Quantidade de vCPU: ${recommendations.vCPUMinimo}
+Distribuição da RAM:
+  SQL Server: ${recommendations.sqlServerMinimo}
+  Windows: ${recommendations.windowsMinimo}
+  Usuários: ${recommendations.usuariosMinimo}
+  BOT (Holos/People): ${recommendations.botMinimo}
+Memória RAM Total: ${recommendations.memoriaRamTotalMinimo}
+Versão do SQL Server: ${recommendations.sqlServerVersionMinimo}
+
+### Ambiente Recomendado:
+Tipo de Servidor: ${recommendations.tipoServidor}
+Quantidade de vCPU: ${recommendations.vCPURecomendado}
+Distribuição da RAM:
+  SQL Server: ${recommendations.sqlServerRecomendado}
+  Windows: ${recommendations.windowsRecomendado}
+  Usuários: ${recommendations.usuariosRecomendado}
+  BOT (Holos/People): ${recommendations.botRecomendado}
+Memória RAM Total: ${recommendations.memoriaRamTotalRecomendado}
+Versão do SQL Server: ${recommendations.sqlServerVersionRecomendado}
+
+Observações: ${recommendations.observacoes || 'Nenhuma.'}
 --------------------------------------------------
 `;
         return report;
