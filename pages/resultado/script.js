@@ -234,16 +234,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // --- Determinação do Tipo de Servidor ---
         // Regra: Micro
-        if (sqlMaiorBancoBaseMB > TEN_GB_MB &&
-            mediaXMLmensal > 10000 &&
-            mediaXMLmensalVarejista > 10000 &&
-            qtdUsuarios >= 7 &&
-            data.impressora === 'Sim' &&
-            data.nfe === 'Sim' &&
-            data.ponto === 'Sim' &&
-            data.holos === 'Sim' && // Holos é o "BOT" aqui
-            data.vpn === 'Sim' &&
-            data.certificado === 'A3') {
+        if (sqlMaiorBancoBaseMB > TEN_GB_MB && // Se tiver um banco na base maior que 10gb
+            mediaXMLmensal > 10000 && // Se a média de xml mensal for maior que 10000
+            mediaXMLmensalVarejista > 10000 && // Se a média de xml mensal varejista for maior que 10000
+            qtdUsuarios >= 7 && // Se a quantidade de usuários for igual ou maior que 7
+            data.impressora === 'Sim' && // Se tiver impressão matricial
+            data.nfe === 'Sim' && // Se tiver nfe
+            data.ponto === 'Sim' && // Se tiver NGPonto
+            data.holos === 'Sim' && // Se tiver Holos/People (BOT)
+            data.vpn === 'Sim' && // Se tiver VPN
+            data.certificado === 'A3') { // Se tiver certificado A3
             rec.tipoServidor = 'Micro';
         }
         // Regra: IaaS Cloud
