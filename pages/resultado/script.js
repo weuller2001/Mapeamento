@@ -216,6 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
             memoriaRamTotalRecomendado: 'N/A',
             sqlServerVersionMinimo: 'N/A',
             sqlServerVersionRecomendado: 'N/A',
+            armazenamento: '140 GB', // Adicionado aqui
             observacoes: ''
         };
 
@@ -231,7 +232,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const SEVEN_POINT_ONE_SIX_EIGHT_GB_MB = 7.168 * 1024; // 7168 MB = 7.00 GB
 
         // --- Determinação do Tipo de Servidor ---
-        // Regra: Micro (se UMA das condições for verdadeira)
+        // Regra: Micro (se UMA das condições for verdadeira, e HOLOS NÃO É MAIS CRITÉRIO)
         if (sqlMaiorBancoBaseMB > TEN_GB_MB || 
             mediaXMLmensal > 10000 || 
             mediaXMLmensalVarejista > 10000 || 
@@ -239,7 +240,6 @@ document.addEventListener('DOMContentLoaded', function() {
             data.impressora === 'Sim' || 
             data.nfe === 'Sim' || 
             data.ponto === 'Sim' || 
-            data.holos === 'Sim' || 
             data.vpn === 'Sim' || 
             data.certificado === 'A3') { 
             rec.tipoServidor = 'Micro';
@@ -273,19 +273,32 @@ document.addEventListener('DOMContentLoaded', function() {
         const windowsMinVal = 4096; // Valor numérico para cálculo
         const windowsRecVal = 4096; // Valor numérico para cálculo
 
+        // Determine a versão recomendada do SQL Server primeiro, pois afeta o cálculo da RAM do SQL.
+        let recommendedSqlServerVersion = 'Express'; // Default
+        if (sqlMaiorBancoBaseMB > SEVEN_POINT_ONE_SIX_EIGHT_GB_MB) { 
+            recommendedSqlServerVersion = 'Web';
+        }
+        rec.sqlServerVersionMinimo = recommendedSqlServerVersion;
+        rec.sqlServerVersionRecomendado = recommendedSqlServerVersion;
+
 
         if (rec.tipoServidor === 'Micro') {
             // Arredonda para cima usando Math.ceil()
-            rec.vCPUMinimo = Math.ceil(qtdUsuarios / 3.5); 
-            rec.vCPURecomendado = Math.ceil(qtdUsuarios / 2.5);
+            rec.vCPUMinimo = Math.ceil(qtdUsuarios / 3.5); // Alterado para divisão
+            rec.vCPURecomendado = Math.ceil(qtdUsuarios / 2.5); // Alterado para divisão
 
-            // Lógica de cálculo de SQL Server RAM
-            if (qtdUsuarios > 6) {
-                sqlMin = 3584 + ((qtdUsuarios - 6) * 384);
-                sqlRec = 3584 + ((qtdUsuarios - 6) * 768);
-            } else {
-                sqlMin = 3584;
-                sqlRec = 3584;
+            // Lógica de cálculo de SQL Server RAM baseada na versão e qtdUsuarios
+            if (recommendedSqlServerVersion === 'Express') {
+                sqlMin = 3072; // 3GB para Express
+                sqlRec = 3072;
+            } else { // Versão é 'Web'
+                if (qtdUsuarios > 6) {
+                    sqlMin = 3584 + ((qtdUsuarios - 6) * 384);
+                    sqlRec = 3584 + ((qtdUsuarios - 6) * 768);
+                } else {
+                    sqlMin = 3584;
+                    sqlRec = 3584;
+                }
             }
             rec.sqlServerMinimo = `${sqlMin} MB`;
             rec.sqlServerRecomendado = `${sqlRec} MB`;
@@ -330,16 +343,6 @@ document.addEventListener('DOMContentLoaded', function() {
             rec.memoriaRamTotalRecomendado = 'N/A';
             rec.windowsMinimo = 'N/A'; 
             rec.windowsRecomendado = 'N/A'; 
-        }
-
-        // --- Versão do SQL Server (baseado em sqlMaiorBancoBaseMB) ---
-        // Estas regras não dependem do tipo de servidor.
-        if (sqlMaiorBancoBaseMB > SEVEN_POINT_ONE_SIX_EIGHT_GB_MB) { // 7168 MB equivale a 7 GB
-            rec.sqlServerVersionMinimo = 'Web';
-            rec.sqlServerVersionRecomendado = 'Web';
-        } else {
-            rec.sqlServerVersionMinimo = 'Express';
-            rec.sqlServerVersionRecomendado = 'Express';
         }
 
         return rec;
@@ -404,6 +407,7 @@ Distribuição da RAM:
 ${recommendations.botMinimo !== null ? `  BOT (Holos/People): ${recommendations.botMinimo}` : ''}
 Memória RAM Total: ${recommendations.memoriaRamTotalMinimo}
 Versão do SQL Server: ${recommendations.sqlServerVersionMinimo}
+Armazenamento: ${recommendations.armazenamento}
 
 ### Ambiente Recomendado:
 Tipo de Servidor: ${recommendations.tipoServidor}
@@ -415,6 +419,7 @@ Distribuição da RAM:
 ${recommendations.botRecomendado !== null ? `  BOT (Holos/People): ${recommendations.botRecomendado}` : ''}
 Memória RAM Total: ${recommendations.memoriaRamTotalRecomendado}
 Versão do SQL Server: ${recommendations.sqlServerVersionRecomendado}
+Armazenamento: ${recommendations.armazenamento}
 
 Observações: ${recommendations.observacoes || 'Nenhuma.'}
 --------------------------------------------------
