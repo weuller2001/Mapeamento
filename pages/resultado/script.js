@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
     fillElement('mediaXMLmensal', 'mediaXMLmensal');
     fillElement('mediaXMLmensalVarejista', 'mediaXMLmensalVarejista');
     fillElement('sqlMaiorBancoBaseMB', 'sqlMaiorBancoBaseMB', ' GB'); // Agora armazena em MB, mas exibe em GB
-    fillElement('sqlTotalBancoBaseMB', 'sqlTotalBancoBaseMB', ' GB'); // Agora armazena em MB, mas exibe em GB
+    fillElement('sqlTotalBancoBaseMB', 'sqlTotalBancoBaseMB', ' ' + 'GB'); // Agora armazena em MB, mas exibe em GB
     fillElement('windowsVersion', 'windowsVersion');
     fillElement('sqlVersion', 'sqlVersion');
     fillElement('processorName', 'processorName');
@@ -216,7 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
             memoriaRamTotalRecomendado: 'N/A',
             sqlServerVersionMinimo: 'N/A',
             sqlServerVersionRecomendado: 'N/A',
-            armazenamento: '140 GB', // Adicionado aqui
+            armazenamento: '140 GB', 
             observacoes: ''
         };
 
@@ -231,48 +231,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const FOUR_POINT_FIVE_GB_MB = 4.5 * 1024; // 4.5 GB em MB = 4608 MB
         const SEVEN_POINT_ONE_SIX_EIGHT_GB_MB = 7.168 * 1024; // 7168 MB = 7.00 GB
 
-        // --- Determinação do Tipo de Servidor ---
-        // Regra: Micro (se UMA das condições for verdadeira, e HOLOS NÃO É MAIS CRITÉRIO)
-        if (sqlMaiorBancoBaseMB > TEN_GB_MB || 
-            mediaXMLmensal > 10000 || 
-            mediaXMLmensalVarejista > 10000 || 
-            qtdUsuarios >= 7 || 
-            data.impressora === 'Sim' || 
-            data.nfe === 'Sim' || 
-            data.ponto === 'Sim' || 
-            data.vpn === 'Sim' || 
-            data.certificado === 'A3') { 
-            rec.tipoServidor = 'Micro';
-        }
-        // Regra: IaaS Cloud (TODAS as condições devem ser verdadeiras)
-        else if (sqlMaiorBancoBaseMB >= TEN_GB_MB &&
-                 mediaXMLmensal >= 10000 &&
-                 mediaXMLmensalVarejista >= 10000 &&
-                 qtdUsuarios <= 6) {
-            rec.tipoServidor = 'IaaS Cloud';
-        }
-        // Regra: NG Start (TODAS as condições devem ser verdadeiras)
-        else if (sqlMaiorBancoBaseMB <= FOUR_POINT_FIVE_GB_MB &&
-                 mediaXMLmensal >= 1000 &&
-                 mediaXMLmensalVarejista <= 1000 &&
-                 qtdUsuarios <= 3) {
-            rec.tipoServidor = 'NG Start';
-        } else {
-            rec.tipoServidor = 'Não classificado'; // Caso não caia em nenhuma das regras
-            rec.observacoes += 'Não foi possível classificar o tipo de servidor com as regras fornecidas. ';
-        }
-
-
-        // --- Cálculos Condicionais para Tipo de Servidor "Micro" ---
-        let sqlMin = 0;
-        let sqlRec = 0;
-        let usuariosMin = 0;
-        let usuariosRec = 0;
-        let holosBotMin = 0; // Usando holosBot para o cálculo
-        let holosBotRec = 0; // Usando holosBot para o cálculo
-        const windowsMinVal = 4096; // Valor numérico para cálculo
-        const windowsRecVal = 4096; // Valor numérico para cálculo
-
         // Determine a versão recomendada do SQL Server primeiro, pois afeta o cálculo da RAM do SQL.
         let recommendedSqlServerVersion = 'Express'; // Default
         if (sqlMaiorBancoBaseMB > SEVEN_POINT_ONE_SIX_EIGHT_GB_MB) { 
@@ -282,10 +240,53 @@ document.addEventListener('DOMContentLoaded', function() {
         rec.sqlServerVersionRecomendado = recommendedSqlServerVersion;
 
 
+        // --- Determinação do Tipo de Servidor (com hierarquia) ---
+
+        // 1. Tentar NG Start
+        if (sqlMaiorBancoBaseMB <= FOUR_POINT_FIVE_GB_MB || // Banco <= 4.5GB
+            mediaXMLmensal >= 1000 || // XML Mensal >= 1000
+            mediaXMLmensalVarejista <= 1000 || // XML Mensal Varejista <= 1000
+            qtdUsuarios <= 3) { // Usuários <= 3
+            rec.tipoServidor = 'NG Start';
+        }
+        // 2. Tentar IaaS Cloud (se não for NG Start)
+        else if (sqlMaiorBancoBaseMB >= TEN_GB_MB || // Banco >= 10GB
+                 mediaXMLmensal >= 10000 || // XML Mensal >= 10000
+                 mediaXMLmensalVarejista >= 10000 || // XML Mensal Varejista >= 10000
+                 qtdUsuarios <= 6) { // Usuários <= 6
+            rec.tipoServidor = 'IaaS Cloud';
+        }
+        // 3. Tentar Micro (se não for NG Start nem IaaS Cloud)
+        else if (sqlMaiorBancoBaseMB > TEN_GB_MB || 
+                 mediaXMLmensal > 10000 || 
+                 mediaXMLmensalVarejista > 10000 || 
+                 qtdUsuarios >= 7 || 
+                 data.impressora === 'Sim' || 
+                 data.nfe === 'Sim' || 
+                 data.ponto === 'Sim' || 
+                 data.vpn === 'Sim' || 
+                 data.certificado === 'A3') { 
+            rec.tipoServidor = 'Micro';
+        } else {
+            rec.tipoServidor = 'Não classificado';
+            rec.observacoes += 'Não foi possível classificar o tipo de servidor com as regras fornecidas. ';
+        }
+
+
+        // --- Cálculos Condicionais para Tipo de Servidor "Micro" ---
+        let sqlMin = 0;
+        let sqlRec = 0;
+        let usuariosMin = 0;
+        let usuariosRec = 0;
+        let holosBotMin = 0; 
+        let holosBotRec = 0; 
+        const windowsMinVal = 4096; 
+        const windowsRecVal = 4096; 
+
+
         if (rec.tipoServidor === 'Micro') {
-            // Arredonda para cima usando Math.ceil()
-            rec.vCPUMinimo = Math.ceil(qtdUsuarios / 3.5); // Alterado para divisão
-            rec.vCPURecomendado = Math.ceil(qtdUsuarios / 2.5); // Alterado para divisão
+            rec.vCPUMinimo = Math.ceil(qtdUsuarios / 3.5); 
+            rec.vCPURecomendado = Math.ceil(qtdUsuarios / 2.5);
 
             // Lógica de cálculo de SQL Server RAM baseada na versão e qtdUsuarios
             if (recommendedSqlServerVersion === 'Express') {
@@ -316,13 +317,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 rec.botMinimo = `${holosBotMin} MB`;
                 rec.botRecomendado = `${holosBotRec} MB`;
             } else {
-                // Se Holos não for "Sim", defina os valores como null para não exibir no relatório
                 rec.botMinimo = null; 
                 rec.botRecomendado = null;
             }
 
             // Memória RAM Total (usando os valores numéricos)
-            // A soma só inclui BOT se ele for relevante
             const currentHolosBotMin = (data.holos === 'Sim' ? holosBotMin : 0);
             const currentHolosBotRec = (data.holos === 'Sim' ? holosBotRec : 0);
 
@@ -330,19 +329,19 @@ document.addEventListener('DOMContentLoaded', function() {
             rec.memoriaRamTotalRecomendado = `${sqlRec + windowsRecVal + usuariosRec + currentHolosBotRec} MB`;
 
         } else {
-            // Limpa os campos se não for tipo Micro
+            // Se não for tipo Micro, os cálculos específicos de vCPU e RAM (SQL, Usuários, BOT) não se aplicam
             rec.vCPUMinimo = 'N/A';
             rec.vCPURecomendado = 'N/A';
             rec.sqlServerMinimo = 'N/A';
             rec.sqlServerRecomendado = 'N/A';
             rec.usuariosMinimo = 'N/A';
             rec.usuariosRecomendado = 'N/A';
-            rec.botMinimo = null; // Definido como null para não exibir
-            rec.botRecomendado = null; // Definido como null para não exibir
+            rec.botMinimo = null; 
+            rec.botRecomendado = null; 
             rec.memoriaRamTotalMinimo = 'N/A';
             rec.memoriaRamTotalRecomendado = 'N/A';
-            rec.windowsMinimo = 'N/A'; 
-            rec.windowsRecomendado = 'N/A'; 
+            rec.windowsMinimo = 'N/A'; // Windows RAM também se torna N/A se não for Micro
+            rec.windowsRecomendado = 'N/A'; // Windows RAM também se torna N/A se não for Micro
         }
 
         return rec;
