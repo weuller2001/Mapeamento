@@ -276,8 +276,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (rec.tipoServidor === 'Micro') {
             // Arredonda para cima usando Math.ceil()
-            rec.vCPUMinimo = Math.ceil(qtdUsuarios * 2.5); 
-            rec.vCPURecomendado = Math.ceil(qtdUsuarios * 3.5);
+            rec.vCPUMinimo = Math.ceil(qtdUsuarios / 3.5); 
+            rec.vCPURecomendado = Math.ceil(qtdUsuarios / 2.5);
 
             // Lógica de cálculo de SQL Server RAM
             if (qtdUsuarios > 6) {
