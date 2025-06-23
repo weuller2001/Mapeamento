@@ -218,8 +218,8 @@ document.addEventListener('DOMContentLoaded', function() {
             botRecomendado: 'N/A', 
             memoriaRamTotalMinimo: 'N/A',
             memoriaRamTotalRecomendado: 'N/A',
-            sqlServerVersionMinimo: 'N/A',
-            sqlServerVersionRecomendado: 'N/A',
+            sqlServerVersionMinimo: 'N/A', // Será definido abaixo
+            sqlServerVersionRecomendado: 'N/A', // Será definido abaixo
             armazenamento: '140 GB', // Valor padrão para Micro
             observacoes: '' // Inicializa observações como string vazia
         };
@@ -245,13 +245,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const FOUR_POINT_FIVE_GB_MB = 4.5 * 1024; // 4.5 GB em MB = 4608 MB
         const SEVEN_POINT_ONE_SIX_EIGHT_GB_MB = 7.168 * 1024; // 7168 MB = 7.00 GB
 
-        // Determine a versão recomendada do SQL Server primeiro, pois afeta o cálculo da RAM do SQL.
-        let recommendedSqlServerVersion = 'Express'; // Default
+        // Determine a versão recomendada do SQL Server com base no tamanho do banco
+        // Esta é a versão *potencial* para qualquer ambiente, antes de ajustar por tipo
+        let baseRecommendedSqlServerVersion = 'Express'; 
         if (sqlMaiorBancoBaseMB > SEVEN_POINT_ONE_SIX_EIGHT_GB_MB) { 
-            recommendedSqlServerVersion = 'Web';
+            baseRecommendedSqlServerVersion = 'Web';
         }
-        rec.sqlServerVersionMinimo = recommendedSqlServerVersion;
-        rec.sqlServerVersionRecomendado = recommendedSqlServerVersion;
 
 
         // --- Determinação do Tipo de Servidor (com nova hierarquia: Micro -> NG Start -> IaaS Cloud) ---
@@ -266,6 +265,8 @@ document.addEventListener('DOMContentLoaded', function() {
             data.vpn === 'Sim' || 
             data.certificado === 'A3') { 
             rec.tipoServidor = 'Micro';
+            rec.sqlServerVersionMinimo = baseRecommendedSqlServerVersion; // Usa a base recomendada
+            rec.sqlServerVersionRecomendado = baseRecommendedSqlServerVersion;
         }
         // 2. Tentar NG Start (se não for Micro) - TODAS as condições devem ser VERDADEIRAS
         // Nova regra: se Holos/People estiver selecionado, NÃO pode ser NG Start
@@ -275,6 +276,8 @@ document.addEventListener('DOMContentLoaded', function() {
                  (mediaXMLmensalVarejista === 0 || mediaXMLmensalVarejista <= 1000) && // XML Varejista baixo (0 ou <= 1000) E
                  qtdUsuarios <= 3) { // Usuários <= 3
             rec.tipoServidor = 'NG Start';
+            rec.sqlServerVersionMinimo = 'Express'; // NG Start sempre Express
+            rec.sqlServerVersionRecomendado = 'Express';
         }
         // 3. Tentar IaaS Cloud (se não for Micro nem NG Start) - QUALQUER UMA destas condições
         else if ((qtdUsuarios >= 4 && qtdUsuarios <= 6) || // Usuários entre 4 e 6 OU
@@ -282,9 +285,13 @@ document.addEventListener('DOMContentLoaded', function() {
                  (mediaXMLmensal > 1000 && mediaXMLmensal < 10000) || // XML Mensal entre 1000 e 10000 OU
                  (mediaXMLmensalVarejista > 1000 && mediaXMLmensalVarejista < 10000)) { // XML Varejista entre 1000 e 10000
             rec.tipoServidor = 'IaaS Cloud';
+            rec.sqlServerVersionMinimo = 'Web'; // IaaS Cloud sempre Web
+            rec.sqlServerVersionRecomendado = 'Web';
         } else {
             rec.tipoServidor = 'Não classificado';
             rec.observacoes += 'Não foi possível classificar o tipo de servidor com as regras fornecidas.';
+            rec.sqlServerVersionMinimo = 'N/A'; // Se não classificado, SQL também é N/A
+            rec.sqlServerVersionRecomendado = 'N/A';
         }
 
 
@@ -309,7 +316,7 @@ document.addEventListener('DOMContentLoaded', function() {
             rec.vCPURecomendado = Math.ceil(qtdUsuarios / 2.5);
 
             // Lógica de cálculo de SQL Server RAM baseada na versão e qtdUsuarios
-            if (recommendedSqlServerVersion === 'Express') {
+            if (rec.sqlServerVersionRecomendado === 'Express') { // Usa a versão já definida para o tipo
                 sqlMin = 3072; // 3GB para Express
                 sqlRec = 3072;
             } else { // Versão é 'Web'
@@ -429,14 +436,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // Observações de SQL Server para Micro
-            if (recommendedSqlServerVersion === 'Express') {
+            if (rec.sqlServerVersionRecomendado === 'Express') { // Usa a versão definida para Micro
                 if (sqlClientYear !== 0 && sqlClientYear < 2022) {
                     rec.observacoes += '\n- SQL Server: Cliente pode sentir ganho de perfomance, pois seu SQL atual está desatualizado.';
                 }
                 if (sqlClientEdition.toLowerCase() !== 'express' && sqlClientEdition.toLowerCase() !== 'unknown') { // se for Standard, Enterprise, etc.
                     rec.observacoes += '\n- SQL Server: Cliente pode sentir perda de perfomance, pois seu SQL atual é entrega mais desempenho (pode ser ofertado o micro com SQL Web para ter mais desempenho).';
                 }
-            } else if (recommendedSqlServerVersion === 'Web') { // Micro com SQL Web
+            } else if (rec.sqlServerVersionRecomendado === 'Web') { // Micro com SQL Web
                 if (sqlClientEdition.toLowerCase() === 'express') {
                     rec.observacoes += '\n- SQL Server: Cliente pode sentir ganho de perfomance, pois seu SQL atual entrega menos desempenho em relação ao cloud.';
                 }
@@ -591,15 +598,18 @@ Data da Coleta: ${new Date().toLocaleString()}`);
         }
         
         if (resultMappingParts.length > 0) {
-             reportParts.push(`---\n## Resultado do mapeamento\n${resultMappingParts.join('\n\n')}`); // Adiciona '\n\n' entre as subseções Minimo/Recomendado
+             reportParts.push(`---
+## Resultado do mapeamento\n${resultMappingParts.join('\n\n')}`); // Adiciona '\n\n' entre as subseções Minimo/Recomendado
         }
 
 
         // Observações
         if (!isNA(recommendations.observacoes)) { // Verifica se há observações para exibir
-            reportParts.push(`---\nObservações:\n${recommendations.observacoes}`);
+            reportParts.push(`---
+Observações:\n${recommendations.observacoes}`);
         } else {
-            reportParts.push(`---\nObservações:\nNenhuma observação.`); // Mantém a linha de "Nenhuma observação." se não houver
+            reportParts.push(`---
+Observações:\nNenhuma observação.`); // Mantém a linha de "Nenhuma observação." se não houver
         }
 
 
