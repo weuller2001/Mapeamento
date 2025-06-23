@@ -591,18 +591,15 @@ Data da Coleta: ${new Date().toLocaleString()}`);
         }
         
         if (resultMappingParts.length > 0) {
-             reportParts.push(`---
-## Resultado do mapeamento\n${resultMappingParts.join('\n\n')}`); // Adiciona '\n\n' entre as subseções Minimo/Recomendado
+             reportParts.push(`---\n## Resultado do mapeamento\n${resultMappingParts.join('\n\n')}`); // Adiciona '\n\n' entre as subseções Minimo/Recomendado
         }
 
 
         // Observações
         if (!isNA(recommendations.observacoes)) { // Verifica se há observações para exibir
-            reportParts.push(`---
-Observações: ${recommendations.observacoes}`);
+            reportParts.push(`---\nObservações:\n${recommendations.observacoes}`);
         } else {
-            reportParts.push(`---
-Observações: Nenhuma observação.`); // Mantém a linha de "Nenhuma observação." se não houver
+            reportParts.push(`---\nObservações:\nNenhuma observação.`); // Mantém a linha de "Nenhuma observação." se não houver
         }
 
 
