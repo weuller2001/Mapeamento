@@ -261,11 +261,11 @@ document.addEventListener('DOMContentLoaded', function() {
                  qtdUsuarios <= 3) { // Usuários <= 3
             rec.tipoServidor = 'NG Start';
         }
-        // 3. Tentar IaaS Cloud (se não for Micro nem NG Start) - TODAS as condições devem ser VERDADEIRAS
-        else if (sqlMaiorBancoBaseMB >= TEN_GB_MB && 
-                 mediaXMLmensal >= 10000 && 
-                 mediaXMLmensalVarejista >= 10000 && 
-                 qtdUsuarios <= 6) { 
+        // 3. Tentar IaaS Cloud (se não for Micro nem NG Start) - QUALQUER UMA destas condições
+        else if ((qtdUsuarios >= 4 && qtdUsuarios <= 6) || // Usuários entre 4 e 6 OU
+                 (sqlMaiorBancoBaseMB > FOUR_POINT_FIVE_GB_MB && sqlMaiorBancoBaseMB < TEN_GB_MB) || // Banco entre 4.5GB e 10GB OU
+                 (mediaXMLmensal > 1000 && mediaXMLmensal < 10000) || // XML Mensal entre 1000 e 10000 OU
+                 (mediaXMLmensalVarejista > 1000 && mediaXMLmensalVarejista < 10000)) { // XML Varejista entre 1000 e 10000
             rec.tipoServidor = 'IaaS Cloud';
         } else {
             rec.tipoServidor = 'Não classificado';
