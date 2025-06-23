@@ -216,7 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
             memoriaRamTotalRecomendado: 'N/A',
             sqlServerVersionMinimo: 'N/A',
             sqlServerVersionRecomendado: 'N/A',
-            armazenamento: '140 GB', 
+            armazenamento: '140 GB', // Valor padrão para Micro
             observacoes: ''
         };
 
@@ -255,7 +255,9 @@ document.addEventListener('DOMContentLoaded', function() {
             rec.tipoServidor = 'Micro';
         }
         // 2. Tentar NG Start (se não for Micro) - TODAS as condições devem ser VERDADEIRAS
-        else if (sqlMaiorBancoBaseMB <= FOUR_POINT_FIVE_GB_MB && // Banco <= 4.5GB E
+        // Nova regra: se Holos/People estiver selecionado, NÃO pode ser NG Start
+        else if (data.holos !== 'Sim' && // Condição para impedir NG Start se Holos for 'Sim'
+                 sqlMaiorBancoBaseMB <= FOUR_POINT_FIVE_GB_MB && // Banco <= 4.5GB E
                  (mediaXMLmensal === 0 || mediaXMLmensal <= 1000) && // XML Mensal baixo (0 ou <= 1000) E
                  (mediaXMLmensalVarejista === 0 || mediaXMLmensalVarejista <= 1000) && // XML Varejista baixo (0 ou <= 1000) E
                  qtdUsuarios <= 3) { // Usuários <= 3
@@ -273,7 +275,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
 
-        // --- Cálculos Condicionais para Tipo de Servidor "Micro" ---
+        // --- Cálculos Condicionais ---
         let sqlMin = 0;
         let sqlRec = 0;
         let usuariosMin = 0;
@@ -282,6 +284,11 @@ document.addEventListener('DOMContentLoaded', function() {
         let holosBotRec = 0; 
         const windowsMinVal = 4096; 
         const windowsRecVal = 4096; 
+
+        // Definir armazenamento padrão de 2GB para não-Micro
+        if (rec.tipoServidor !== 'Micro') {
+            rec.armazenamento = '2 GB';
+        }
 
 
         if (rec.tipoServidor === 'Micro') {
