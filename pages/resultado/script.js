@@ -559,6 +559,8 @@ ${buildLine('Memória RAM Total', recommendations.memoriaRamTotalMinimo)}
 ${buildLine('Versão do SQL Server', recommendations.sqlServerVersionMinimo)}
 ${buildLine('Armazenamento', recommendations.armazenamento)}
 
+-
+
 ### Ambiente Recomendado:
 ${buildLine('Tipo de Servidor', recommendations.tipoServidor)}
 ${buildLine('Quantidade de vCPU', recommendations.vCPURecomendado)}
