@@ -14,35 +14,30 @@ document.addEventListener('DOMContentLoaded', function() {
         let value = params.get(paramName); // Pega o valor do parâmetro da URL
         
         if (value !== null) { // Se o parâmetro existe na URL
-            // PASSO CRUCIAL:
-            // 1. Substituir '+' por espaço (alguns navegadores fazem isso, outros não para URLSearchParams.get())
-            // 2. Decodificar quaisquer caracteres percent-encoded (%XX) como %c3%87 ou %40
+            // 1. Substituir '+' por espaço
+            // 2. Decodificar quaisquer caracteres percent-encoded (%XX)
             value = decodeURIComponent(value.replace(/\+/g, ' '));
             
-            // Tratamento para números com vírgula como separador decimal (cultura brasileira)
             let displayValue = value;
-            if (id.includes('MB') || id.includes('GB') || id.includes('Mbps') || id.includes('cpuMultiCoreScore')) {
-                // Esta substituição é para exibição e para que parseFloat funcione se necessário
+            let storedValue = value; // Default: armazenar como string original
+
+            // Tratar apenas campos numéricos para conversão e armazenamento como número
+            if (['sqlMaiorBancoBaseMB', 'sqlTotalBancoBaseMB', 'totalRamGB', 'diskTotalGB'].includes(paramName)) {
                 // Convertendo GB para MB para facilitar comparações numéricas
-                if (id.includes('sqlMaiorBancoBaseMB') || id.includes('sqlTotalBancoBaseMB') || id.includes('totalRamGB') || id.includes('diskTotalGB')) {
-                    displayValue = (parseFloat(value.replace(',', '.')) * 1024).toFixed(2); // Convertendo GB para MB
-                } else {
-                    displayValue = value.replace(',', '.'); 
-                }
+                storedValue = (parseFloat(value.replace(',', '.')) * 1024);
+                displayValue = (storedValue / 1024).toFixed(2); // Para exibição em GB novamente
+            } else if (['diskReadSpeedMBps', 'diskWriteSpeedMBps', 'cpuMultiCoreScore', 'internetUploadSpeedMbps', 'internetDownloadSpeedMbps'].includes(paramName)) {
+                storedValue = parseFloat(value.replace(',', '.'));
             }
-            
-            // Atribui o valor decodificado e tratado para o elemento na página
+            // Para outros campos (texto), storedValue permanece como a string original 'value'
+
+            // Atribui o valor para o elemento na página
             const element = document.getElementById(id);
             if (element) {
-                // Para exibição, se for GB, converte de volta ou adiciona o sufixo original
-                if (id.includes('sqlMaiorBancoBaseMB') || id.includes('sqlTotalBancoBaseMB') || id.includes('totalRamGB') || id.includes('diskTotalGB')) {
-                     element.textContent = (parseFloat(displayValue) / 1024).toFixed(2) + suffix; // Exibe em GB novamente
-                } else {
-                    element.textContent = displayValue + suffix;
-                }
+                element.textContent = displayValue + suffix;
                 dataFound = true;
-                // Armazena o valor NUMÉRICO tratado para uso no relatório e cálculos
-                collectedDataForReport[paramName] = parseFloat(displayValue);
+                // Armazena o valor tratado (numérico ou string) para uso no relatório e cálculos
+                collectedDataForReport[paramName] = storedValue;
             }
         } else { // Se o parâmetro não existe na URL
             const element = document.getElementById(id);
@@ -420,8 +415,9 @@ document.addEventListener('DOMContentLoaded', function() {
             } else if (totalRamGB < 16 * 1024) {
                 rec.observacoes += '\n- Memória: Cliente pode sentir ganho de performance, pois sua memória atual possuí menos capacidade que a do cloud.';
             }
+            // Nova regra: IaaS Cloud sempre usa SQL Web. Comentário se cliente usa Express
             if (sqlClientEdition.toLowerCase() === 'express') {
-                rec.observacoes += '\n- SQL Server: Cliente pode sentir ganho de perfomance, pois seu SQL atual entrega menos desempenho em relação ao cloud.';
+                rec.observacoes += '\n- SQL Server: Cliente pode sentir ganho de perfomance, pois seu SQL atual entrega menos desempenho em relação ao cloud (O IaaS Cloud utiliza SQL Server WEB).';
             }
 
 
@@ -481,101 +477,137 @@ document.addEventListener('DOMContentLoaded', function() {
         // Função para construir uma linha condicionalmente
         const buildLine = (label, value, suffix = '') => {
             if (!isNA(value)) {
-                return `${label}: ${value}${suffix}\n`;
+                return `${label}: ${value}${suffix}`; // Removido o '\n' para que o filter final cuide da quebra de linha
             }
             return '';
         };
 
         // Função para construir a seção de Distribuição da RAM condicionalmente
-        const buildRamDistribution = (sqlMin, winMin, userMin, botMin) => {
-            const lines = [
-                buildLine('  SQL Server', sqlMin),
-                buildLine('  Windows', winMin),
-                buildLine('  Usuários', userMin),
-                recommendations.botMinimo !== null ? `  BOT (Holos/People): ${botMin}\n` : ''
-            ].filter(line => line !== '').join(''); // Filtra linhas vazias e junta
+        const buildRamDistribution = (sql, win, user, bot, type) => {
+            let lines = [];
+            let sqlLine = buildLine('  SQL Server', sql);
+            let winLine = buildLine('  Windows', win);
+            let userLine = buildLine('  Usuários', user);
+            let botLine = (recommendations[type === 'Minimo' ? 'botMinimo' : 'botRecomendado'] !== null) ? `  BOT (Holos/People): ${bot}` : '';
 
-            if (lines.trim() !== '') {
-                return `Distribuição da RAM:\n${lines}`;
+            if (sqlLine) lines.push(sqlLine);
+            if (winLine) lines.push(winLine);
+            if (userLine) lines.push(userLine);
+            if (botLine) lines.push(botLine);
+
+            if (lines.length > 0) {
+                return `Distribuição da RAM:\n${lines.join('\n')}`; // Adiciona quebra de linha entre as sub-linhas
             }
             return '';
         };
 
 
-        let report = `--- Relatório de Diagnóstico de Sistema e SQL ---
-Data da Coleta: ${new Date().toLocaleString()}
+        let reportParts = []; // Array para armazenar as partes do relatório
+        reportParts.push(`--- Relatório de Diagnóstico de Sistema e SQL ---
+Data da Coleta: ${new Date().toLocaleString()}`);
 
-## Dados do Cliente e Empresas
-${buildLine('Informações do Cliente', data.clienteInfo)}
-${buildLine('Empresas Ativas', data.empAtivas)}
-${buildLine('Empresas Inativas', data.empInativas)}
-${buildLine('Total de Empresas', data.empTotal)}
-${buildLine('Maior Quadro de Funcionários', data.funcionariosEmpresaMaior)}
-${buildLine('Total de Funcionários da Base', data.funcionariosEmpresaTotal)}
-${buildLine('Média XML Mensal', data.mediaXMLmensal)}
-${buildLine('Média XML Mensal(Varejista)', data.mediaXMLmensalVarejista)}
-${buildLine('Maior Banco de Dados', (data.sqlMaiorBancoBaseMB / 1024).toFixed(2), ' GB')}
-${buildLine('Tamanho Total da Base', (data.sqlTotalBancoBaseMB / 1024).toFixed(2), ' GB')}
+        // ## Dados do Cliente e Empresas
+        let clientDataLines = [
+            buildLine('Informações do Cliente', data.clienteInfo),
+            buildLine('Empresas Ativas', data.empAtivas),
+            buildLine('Empresas Inativas', data.empInativas),
+            buildLine('Total de Empresas', data.empTotal),
+            buildLine('Maior Quadro de Funcionários', data.funcionariosEmpresaMaior),
+            buildLine('Total de Funcionários da Base', data.funcionariosEmpresaTotal),
+            buildLine('Média XML Mensal', data.mediaXMLmensal),
+            buildLine('Média XML Mensal(Varejista)', data.mediaXMLmensalVarejista),
+            buildLine('Maior Banco de Dados', (data.sqlMaiorBancoBaseMB / 1024).toFixed(2), ' GB'),
+            buildLine('Tamanho Total da Base', (data.sqlTotalBancoBaseMB / 1024).toFixed(2), ' GB')
+        ].filter(line => line !== '');
+        if (clientDataLines.length > 0) {
+            reportParts.push(`## Dados do Cliente e Empresas\n${clientDataLines.join('\n')}`);
+        }
 
----
+        // ## Dados do Ambiente (SO, Hardware e SQL Server)
+        let envDataLines = [
+            buildLine('Versão do Windows', data.windowsVersion),
+            buildLine('Versão do SQL Server', data.sqlVersion),
+            buildLine('Nome do Processador', data.processorName),
+            buildLine('Número de Cores/Núcleos', data.coreCount),
+            buildLine('RAM Total', (data.totalRamGB / 1024).toFixed(2), ' GB'),
+            buildLine('RAM Alocada para SQL Server', data.sqlRamDisplay),
+            buildLine('Tipo de Conexão', data.connectionType),
+            buildLine('Velocidade de Leitura de Disco', data.diskReadSpeedMBps, ' MB/s'),
+            buildLine('Velocidade de Escrita de Disco', data.diskWriteSpeedMBps, ' MB/s'),
+            buildLine('Tipo de Disco', data.diskType),
+            buildLine('Tamanho Total do Disco', (data.diskTotalGB / 1024).toFixed(2), ' GB'),
+            buildLine('Pontuação CPU Multi-core', data.cpuMultiCoreScore),
+            buildLine('Velocidade de Upload(Aproximado)', data.internetUploadSpeedMbps, ' Mbps'),
+            buildLine('Velocidade de Download(Aproximado)', data.internetDownloadSpeedMbps, ' Mbps')
+        ].filter(line => line !== '');
+        if (envDataLines.length > 0) {
+            reportParts.push(`---
+## Dados do Ambiente (SO, Hardware e SQL Server)\n${envDataLines.join('\n')}`);
+        }
 
-## Dados do Ambiente (SO, Hardware e SQL Server)
-${buildLine('Versão do Windows', data.windowsVersion)}
-${buildLine('Versão do SQL Server', data.sqlVersion)}
-${buildLine('Nome do Processador', data.processorName)}
-${buildLine('Número de Cores/Núcleos', data.coreCount)}
-${buildLine('RAM Total', (data.totalRamGB / 1024).toFixed(2), ' GB')}
-${buildLine('RAM Alocada para SQL Server', data.sqlRamDisplay)}
-${buildLine('Tipo de Conexão', data.connectionType)}
-${buildLine('Velocidade de Leitura de Disco', data.diskReadSpeedMBps, ' MB/s')}
-${buildLine('Velocidade de Escrita de Disco', data.diskWriteSpeedMBps, ' MB/s')}
-${buildLine('Tipo de Disco', data.diskType)}
-${buildLine('Tamanho Total do Disco', (data.diskTotalGB / 1024).toFixed(2), ' GB')}
-${buildLine('Pontuação CPU Multi-core', data.cpuMultiCoreScore)}
-${buildLine('Velocidade de Upload(Aproximado)', data.internetUploadSpeedMbps, ' Mbps')}
-${buildLine('Velocidade de Download(Aproximado)', data.internetDownloadSpeedMbps, ' Mbps')}
+        // ## Parâmetros do Mapeamento
+        let mappingDataLines = [
+            buildLine('Possui Impressora Matricial', data.impressora),
+            buildLine('Possui NFe Express', data.nfe),
+            buildLine('Utiliza NGPonto', data.ponto),
+            buildLine('Utiliza Holos/People', data.holos),
+            buildLine('Precisa de VPN', data.vpn),
+            buildLine('Certificado Digital', data.certificado),
+            buildLine('Quantidade de Usuários para acesso', data.qtdUsuarios),
+            buildLine('Número do Chamado', data.codChamado)
+        ].filter(line => line !== '');
+        if (mappingDataLines.length > 0) {
+            reportParts.push(`---
+## Parâmetros do Mapeamento\n${mappingDataLines.join('\n')}`);
+        }
 
----
+        // ## Resultado do mapeamento
+        let resultMappingParts = [];
 
-## Parâmetros do Mapeamento
-${buildLine('Possui Impressora Matricial', data.impressora)}
-${buildLine('Possui NFe Express', data.nfe)}
-${buildLine('Utiliza NGPonto', data.ponto)}
-${buildLine('Utiliza Holos/People', data.holos)}
-${buildLine('Precisa de VPN', data.vpn)}
-${buildLine('Certificado Digital', data.certificado)}
-${buildLine('Quantidade de Usuários para acesso', data.qtdUsuarios)}
-${buildLine('Número do Chamado', data.codChamado)}
+        // Ambiente Minimo
+        let minLines = [
+            buildLine('Tipo de Servidor', recommendations.tipoServidor),
+            buildLine('Quantidade de vCPU', recommendations.vCPUMinimo),
+            buildRamDistribution(recommendations.sqlServerMinimo, recommendations.windowsMinimo, recommendations.usuariosMinimo, recommendations.botMinimo, 'Minimo'),
+            buildLine('Memória RAM Total', recommendations.memoriaRamTotalMinimo),
+            buildLine('Versão do SQL Server', recommendations.sqlServerVersionMinimo),
+            buildLine('Armazenamento', recommendations.armazenamento)
+        ].filter(line => line !== '');
+        if (minLines.length > 0) {
+            resultMappingParts.push(`### Ambiente Minimo:\n${minLines.join('\n')}`);
+        }
 
----
+        // Ambiente Recomendado
+        let recLines = [
+            buildLine('Tipo de Servidor', recommendations.tipoServidor),
+            buildLine('Quantidade de vCPU', recommendations.vCPURecomendado),
+            buildRamDistribution(recommendations.sqlServerRecomendado, recommendations.windowsRecomendado, recommendations.usuariosRecomendado, recommendations.botRecomendado, 'Recomendado'),
+            buildLine('Memória RAM Total', recommendations.memoriaRamTotalRecomendado),
+            buildLine('Versão do SQL Server', recommendations.sqlServerVersionRecomendado),
+            buildLine('Armazenamento', recommendations.armazenamento)
+        ].filter(line => line !== '');
+        if (recLines.length > 0) {
+            resultMappingParts.push(`### Ambiente Recomendado:\n${recLines.join('\n')}`);
+        }
+        
+        if (resultMappingParts.length > 0) {
+             reportParts.push(`---
+## Resultado do mapeamento\n${resultMappingParts.join('\n\n')}`); // Adiciona '\n\n' entre as subseções Minimo/Recomendado
+        }
 
-## Resultado do mapeamento
 
-### Ambiente Minimo:
-${buildLine('Tipo de Servidor', recommendations.tipoServidor)}
-${buildLine('Quantidade de vCPU', recommendations.vCPUMinimo)}
-${buildRamDistribution(recommendations.sqlServerMinimo, recommendations.windowsMinimo, recommendations.usuariosMinimo, recommendations.botMinimo)}
-${buildLine('Memória RAM Total', recommendations.memoriaRamTotalMinimo)}
-${buildLine('Versão do SQL Server', recommendations.sqlServerVersionMinimo)}
-${buildLine('Armazenamento', recommendations.armazenamento)}
+        // Observações
+        if (!isNA(recommendations.observacoes)) { // Verifica se há observações para exibir
+            reportParts.push(`---
+Observações: ${recommendations.observacoes}`);
+        } else {
+            reportParts.push(`---
+Observações: Nenhuma observação.`); // Mantém a linha de "Nenhuma observação." se não houver
+        }
 
--
 
-### Ambiente Recomendado:
-${buildLine('Tipo de Servidor', recommendations.tipoServidor)}
-${buildLine('Quantidade de vCPU', recommendations.vCPURecomendado)}
-${buildRamDistribution(recommendations.sqlServerRecomendado, recommendations.windowsRecomendado, recommendations.usuariosRecomendado, recommendations.botRecomendado)}
-${buildLine('Memória RAM Total', recommendations.memoriaRamTotalRecomendado)}
-${buildLine('Versão do SQL Server', recommendations.sqlServerVersionRecomendado)}
-${buildLine('Armazenamento', recommendations.armazenamento)}
-
----
-
-Observações: 
-${recommendations.observacoes || 'Nenhuma observação.'}
---------------------------------------------------
-`;
-        // Filtra linhas vazias e remove quebras de linha múltiplas para evitar espaçamento desnecessário
-        return report.split('\n').filter(line => line.trim() !== '').join('\n');
+        // Junta todas as partes do relatório
+        let finalReport = reportParts.join('\n\n'); // Junta seções principais com duas quebras de linha
+        return finalReport;
     }
 });
