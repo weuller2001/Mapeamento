@@ -198,6 +198,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Helper para extrair o ano e a edição do SQL Server
+    function parseSqlServerVersion(sqlVersionString) {
+        const yearMatch = sqlVersionString.match(/SQL Server (\d{4})/);
+        const editionMatch = sqlVersionString.match(/(Express|Standard|Enterprise|Web) Edition/i);
+        const edition = editionMatch ? editionMatch[1] : 'Unknown';
+        const year = yearMatch ? parseInt(yearMatch[1], 10) : 0; // 0 se não encontrar o ano
+        return { year, edition };
+    }
+
     // --- Nova função para calcular as recomendações ---
     function calculateRecommendations(data) {
         const rec = {
@@ -217,7 +226,7 @@ document.addEventListener('DOMContentLoaded', function() {
             sqlServerVersionMinimo: 'N/A',
             sqlServerVersionRecomendado: 'N/A',
             armazenamento: '140 GB', // Valor padrão para Micro
-            observacoes: ''
+            observacoes: '' // Inicializa observações como string vazia
         };
 
         // Parse de valores numéricos, garantindo que sejam números
@@ -225,6 +234,16 @@ document.addEventListener('DOMContentLoaded', function() {
         const mediaXMLmensal = parseFloat(data.mediaXMLmensal) || 0;
         const mediaXMLmensalVarejista = parseFloat(data.mediaXMLmensalVarejista) || 0;
         const qtdUsuarios = parseInt(data.qtdUsuarios) || 0;
+        const totalRamGB = parseFloat(data.totalRamGB) || 0; // RAM do cliente em MB
+        const cpuMultiCoreScore = parseFloat(data.cpuMultiCoreScore) || 0;
+        const internetDownloadSpeedMbps = parseFloat(data.internetDownloadSpeedMbps) || 0;
+        const diskReadSpeedMBps = parseFloat(data.diskReadSpeedMBps) || 0;
+        const diskWriteSpeedMBps = parseFloat(data.diskWriteSpeedMBps) || 0;
+        const connectionType = data.connectionType || '';
+        const sqlVersionClient = data.sqlVersion || ''; // Versão do SQL do cliente (string completa)
+
+        const { year: sqlClientYear, edition: sqlClientEdition } = parseSqlServerVersion(sqlVersionClient);
+
 
         // Limites em MB para comparações
         const TEN_GB_MB = 10 * 1024; // 10 GB em MB = 10240 MB
@@ -354,6 +373,97 @@ document.addEventListener('DOMContentLoaded', function() {
         // Se for "Não classificado", os valores já estão como 'N/A' (ou null para BOT) no início do rec,
         // então não precisamos de um 'else' adicional aqui.
 
+        // --- Adicionar Observações ---
+        // Observações gerais do ambiente (aplicáveis a todos os tipos de servidor)
+        if (cpuMultiCoreScore > 1000000) {
+            rec.observacoes += '\n- Cliente pode sentir perda de performance, pois seu processador atual possuí mais desempenho que o do cloud.';
+        } else if (cpuMultiCoreScore < 1000000) {
+            rec.observacoes += '\n- Cliente pode sentir ganho de performance, pois seu processador atual possuí menos desempenho que o do cloud.';
+        }
+
+        if (connectionType.toLowerCase() === 'wifi') {
+            rec.observacoes += '\n- Cliente pode ter instabilidades no acesso por utilizar a conexão Wifi, indica-lo a usar sempre conexão cabeada.';
+        }
+
+        if (internetDownloadSpeedMbps < 15) {
+            rec.observacoes += '\n- Cliente pode ter instabilidades no acesso por sua internet ser lenta.';
+        }
+
+        if (diskReadSpeedMBps < 5500 && diskWriteSpeedMBps < 2700) {
+            rec.observacoes += '\n- Cliente pode sentir ganho de performance, pois seu disco atual é lento em comparação ao do cloud.';
+        } else if (diskReadSpeedMBps > 5500 && diskWriteSpeedMBps > 2700) {
+            rec.observacoes += '\n- Cliente pode sentir perda de performance, pois seu disco atual é rápido em comparação ao do cloud.';
+        }
+
+        if (data.ponto === 'Sim') {
+            rec.observacoes += '\n- Importações de ponto do relógio serão feitas manualmente, pois com o sistema em nuvem não é possível coletar automaticamente.';
+        }
+        
+        // Observações específicas por Tipo de Servidor
+        if (rec.tipoServidor === 'NG Start') {
+            if (totalRamGB > 8 * 1024) { // 8GB em MB
+                rec.observacoes += '\n- Cliente pode sentir perda de performance, pois sua memoria atual possuí mais capacidade que o do cloud.';
+            } else if (totalRamGB < 8 * 1024) {
+                rec.observacoes += '\n- Cliente pode sentir ganho de performance, pois sua memoria atual possuí menos capacidade que o do cloud.';
+            }
+            if (sqlClientYear !== 0 && sqlClientYear < 2022) {
+                rec.observacoes += '\n- Cliente pode sentir ganho de perfomance, pois seu SQL atual está desatualizado.';
+            }
+            // A regra "se SQL Server for outra versão diferente do express" para NG Start é um pouco ambígua
+            // se o NG Start for para ambientes simples. Presumi que significa qualquer coisa não Express.
+            if (sqlClientEdition.toLowerCase() !== 'express' && sqlClientEdition.toLowerCase() !== 'unknown') {
+                rec.observacoes += '\n- Cliente pode sentir perda de perfomance, pois seu SQL atual é entrega mais desempenho.';
+            }
+            rec.observacoes += '\n- Micro servidor/aplicação: aplicar a clientes com muitos usuários (usar base de dados massiva). Verificar com o comercial o que é comercializado no momento da venda de novo usuário.';
+            rec.observacoes += '\n- Holos/People: não é vendido para a plataforma Play, deve ser migrado para o ambiente compartilhado.';
+            rec.observacoes += '\n- Clientes de ambiente compartilhado têm 2GB de espaço.';
+
+
+        } else if (rec.tipoServidor === 'IaaS Cloud') {
+            if (totalRamGB > 16 * 1024) { // 16GB em MB
+                rec.observacoes += '\n- Cliente pode sentir perda de performance, pois sua memoria atual possuí mais capacidade que o do cloud.';
+            } else if (totalRamGB < 16 * 1024) {
+                rec.observacoes += '\n- Cliente pode sentir ganho de performance, pois sua memoria atual possuí menos capacidade que o do cloud.';
+            }
+            if (sqlClientEdition.toLowerCase() === 'express') {
+                rec.observacoes += '\n- Cliente pode sentir ganho de perfomance, pois seu SQL atual entrega menos desempenho em relação ao cloud.';
+            }
+
+        } else if (rec.tipoServidor === 'Micro') {
+            // Observações de Memória para Micro
+            // sqlServerMinimo é uma string "XXXX MB", precisa extrair o número
+            const sqlServerMinimoVal = parseFloat(rec.sqlServerMinimo.replace(' MB', '')) || 0;
+            if (totalRamGB < sqlServerMinimoVal) {
+                rec.observacoes += '\n- Cliente pode sentir ganho de performance, pois sua memoria atual possuí menos capacidade que o do cloud.';
+            }
+            
+            // Observações de SQL Server para Micro
+            if (recommendedSqlServerVersion === 'Express') {
+                if (sqlClientYear !== 0 && sqlClientYear < 2022) {
+                    rec.observacoes += '\n- Cliente pode sentir ganho de perfomance, pois seu SQL atual está desatualizado.';
+                }
+                if (sqlClientEdition.toLowerCase() !== 'express' && sqlClientEdition.toLowerCase() !== 'unknown') {
+                    rec.observacoes += '\n- Cliente pode sentir perda de perfomance, pois seu SQL atual é entrega mais desempenho (pode ser ofertado o micro com SQL Web para ter mais desempenho).';
+                }
+            } else if (recommendedSqlServerVersion === 'Web') { // Micro com SQL Web
+                if (sqlClientEdition.toLowerCase() === 'express') {
+                    rec.observacoes += '\n- Cliente pode sentir ganho de perfomance, pois seu SQL atual entrega menos desempenho em relação ao cloud.';
+                }
+            }
+
+            // Observações de Mapeamento Específicas de Micro
+            if (data.certificado === 'A3') {
+                rec.observacoes += '\n- Certificado Digital A3: Não são todos os certificados A3 que são compatíveis com o cloud, será necessário verificar o modelo.';
+            }
+            if (data.impressora === 'Sim') {
+                rec.observacoes += '\n- Impressora Matricial: Não são todos os modelos de impressora matricial que são compatíveis com o cloud, será necessário verificar o modelo.';
+            }
+            if (data.vpn === 'Sim') {
+                rec.observacoes += '\n- VPN: Verificar qual usuário utilizará a VPN (só é permitido 1 usuário na VPN).';
+            }
+            rec.observacoes += '\n- Micro servidor/aplicação: aplicar a clientes com muitos usuários (usar base de dados massiva). Verificar com o comercial o que é comercializado no momento da venda de novo usuário.';
+        }
+
         return rec;
     }
 
@@ -430,7 +540,7 @@ Memória RAM Total: ${recommendations.memoriaRamTotalRecomendado}
 Versão do SQL Server: ${recommendations.sqlServerVersionRecomendado}
 Armazenamento: ${recommendations.armazenamento}
 
-Observações: ${recommendations.observacoes || 'Nenhuma.'}
+Observações: ${recommendations.observacoes || 'Nenhuma observação.'}
 --------------------------------------------------
 `;
         return report;
