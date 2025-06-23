@@ -289,7 +289,7 @@ document.addEventListener('DOMContentLoaded', function() {
             rec.tipoServidor = 'IaaS Cloud';
         } else {
             rec.tipoServidor = 'Não classificado';
-            rec.observacoes += 'Não foi possível classificar o tipo de servidor com as regras fornecidas. ';
+            rec.observacoes += 'Não foi possível classificar o tipo de servidor com as regras fornecidas.';
         }
 
 
@@ -394,7 +394,7 @@ document.addEventListener('DOMContentLoaded', function() {
             rec.observacoes += '\n- Cliente pode sentir perda de performance, pois seu disco atual é rápido em comparação ao do cloud.';
         }
 
-        // Nova regra: Ponto deve adicionar observação independente da classificação para Micro
+        // Ponto deve adicionar observação independente da classificação para Micro
         if (data.ponto === 'Sim') {
             rec.observacoes += '\n- NGPonto: Importações de ponto do relógio serão feitas manualmente, pois com o sistema em nuvem não é possível coletar automaticamente.';
         }
@@ -412,9 +412,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (sqlClientEdition.toLowerCase() !== 'express' && sqlClientEdition.toLowerCase() !== 'unknown') {
                 rec.observacoes += '\n- SQL Server: Cliente pode sentir perda de perfomance, pois seu SQL atual é entrega mais desempenho.';
             }
-            rec.observacoes += '\n- Este ambiente é ideal para clientes com poucos usuários e base de dados pequena.';
-            rec.observacoes += '\n- Holos/People: não é vendido para a plataforma Play e deve ser migrado para o ambiente compartilhado.';
-            rec.observacoes += '\n- Clientes de ambiente compartilhado têm 2GB de espaço para dados.';
 
 
         } else if (rec.tipoServidor === 'IaaS Cloud') {
@@ -426,9 +423,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (sqlClientEdition.toLowerCase() === 'express') {
                 rec.observacoes += '\n- SQL Server: Cliente pode sentir ganho de perfomance, pois seu SQL atual entrega menos desempenho em relação ao cloud.';
             }
-            rec.observacoes += '\n- Este ambiente é ideal para clientes de médio porte ou que precisam de maior flexibilidade em nuvem.';
-            rec.observacoes += '\n- Holos/People: não é vendido para a plataforma Play e deve ser migrado para o ambiente compartilhado.';
-            rec.observacoes += '\n- Clientes de ambiente compartilhado têm 2GB de espaço para dados.';
 
 
         } else if (rec.tipoServidor === 'Micro') {
@@ -462,7 +456,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.vpn === 'Sim') {
                 rec.observacoes += '\n- VPN: Verificar qual usuário utilizará a VPN (só é permitido 1 usuário na VPN).';
             }
-            rec.observacoes += '\n- Este ambiente é ideal para clientes com muitos usuários e base de dados massiva. Verificar com o comercial o que é comercializado no momento da venda de novo usuário.';
         }
 
         // Limpa a string de observações se ela começar com '\n-' ou tiver múltiplos '\n' no início
@@ -482,85 +475,105 @@ document.addEventListener('DOMContentLoaded', function() {
     function generateReportText(data, recommendations) {
         // Helper para verificar se um valor é "N/A" ou nulo/vazio
         const isNA = (value) => {
-            if (value === null || value === undefined || value === '' || String(value).trim().toLowerCase() === 'n/a') {
-                return true;
-            }
-            // Para números, 0 pode ser considerado N/A em certos contextos se não for um valor real.
-            // Aqui estamos focando na string "N/A" ou valores que resultam em strings vazias.
-            return false;
+            return value === null || value === undefined || value === '' || (typeof value === 'string' && value.trim().toLowerCase() === 'n/a');
         };
+
+        // Função para construir uma linha condicionalmente
+        const buildLine = (label, value, suffix = '') => {
+            if (!isNA(value)) {
+                return `${label}: ${value}${suffix}\n`;
+            }
+            return '';
+        };
+
+        // Função para construir a seção de Distribuição da RAM condicionalmente
+        const buildRamDistribution = (sqlMin, winMin, userMin, botMin) => {
+            const lines = [
+                buildLine('  SQL Server', sqlMin),
+                buildLine('  Windows', winMin),
+                buildLine('  Usuários', userMin),
+                recommendations.botMinimo !== null ? `  BOT (Holos/People): ${botMin}\n` : ''
+            ].filter(line => line !== '').join(''); // Filtra linhas vazias e junta
+
+            if (lines.trim() !== '') {
+                return `Distribuição da RAM:\n${lines}`;
+            }
+            return '';
+        };
+
 
         let report = `--- Relatório de Diagnóstico de Sistema e SQL ---
 Data da Coleta: ${new Date().toLocaleString()}
 
 ## Dados do Cliente e Empresas
-${!isNA(data.clienteInfo) ? `Informações do Cliente: ${data.clienteInfo}` : ''}
-${!isNA(data.empAtivas) ? `Empresas Ativas: ${data.empAtivas}` : ''}
-${!isNA(data.empInativas) ? `Empresas Inativas: ${data.empInativas}` : ''}
-${!isNA(data.empTotal) ? `Total de Empresas: ${data.empTotal}` : ''}
-${!isNA(data.funcionariosEmpresaMaior) ? `Maior Quadro de Funcionários: ${data.funcionariosEmpresaMaior}` : ''}
-${!isNA(data.funcionariosEmpresaTotal) ? `Total de Funcionários da Base: ${data.funcionariosEmpresaTotal}` : ''}
-${!isNA(data.mediaXMLmensal) ? `Média XML Mensal: ${data.mediaXMLmensal}` : ''}
-${!isNA(data.mediaXMLmensalVarejista) ? `Média XML Mensal(Varejista): ${data.mediaXMLmensalVarejista}` : ''}
-${!isNA(data.sqlMaiorBancoBaseMB) ? `Maior Banco de Dados: ${(data.sqlMaiorBancoBaseMB / 1024).toFixed(2)} GB` : ''}
-${!isNA(data.sqlTotalBancoBaseMB) ? `Tamanho Total da Base: ${(data.sqlTotalBancoBaseMB / 1024).toFixed(2)} GB` : ''}
+${buildLine('Informações do Cliente', data.clienteInfo)}
+${buildLine('Empresas Ativas', data.empAtivas)}
+${buildLine('Empresas Inativas', data.empInativas)}
+${buildLine('Total de Empresas', data.empTotal)}
+${buildLine('Maior Quadro de Funcionários', data.funcionariosEmpresaMaior)}
+${buildLine('Total de Funcionários da Base', data.funcionariosEmpresaTotal)}
+${buildLine('Média XML Mensal', data.mediaXMLmensal)}
+${buildLine('Média XML Mensal(Varejista)', data.mediaXMLmensalVarejista)}
+${buildLine('Maior Banco de Dados', (data.sqlMaiorBancoBaseMB / 1024).toFixed(2), ' GB')}
+${buildLine('Tamanho Total da Base', (data.sqlTotalBancoBaseMB / 1024).toFixed(2), ' GB')}
+
+---
 
 ## Dados do Ambiente (SO, Hardware e SQL Server)
-${!isNA(data.windowsVersion) ? `Versão do Windows: ${data.windowsVersion}` : ''}
-${!isNA(data.sqlVersion) ? `Versão do SQL Server: ${data.sqlVersion}` : ''}
-${!isNA(data.processorName) ? `Nome do Processador: ${data.processorName}` : ''}
-${!isNA(data.coreCount) ? `Número de Cores/Núcleos: ${data.coreCount}` : ''}
-${!isNA(data.totalRamGB) ? `RAM Total: ${(data.totalRamGB / 1024).toFixed(2)} GB` : ''}
-${!isNA(data.sqlRamDisplay) ? `RAM Alocada para SQL Server: ${data.sqlRamDisplay}` : ''}
-${!isNA(data.connectionType) ? `Tipo de Conexão: ${data.connectionType}` : ''}
-${!isNA(data.diskReadSpeedMBps) ? `Velocidade de Leitura de Disco: ${data.diskReadSpeedMBps} MB/s` : ''}
-${!isNA(data.diskWriteSpeedMBps) ? `Velocidade de Escrita de Disco: ${data.diskWriteSpeedMBps} MB/s` : ''}
-${!isNA(data.diskType) ? `Tipo de Disco: ${data.diskType}` : ''}
-${!isNA(data.diskTotalGB) ? `Tamanho Total do Disco: ${(data.diskTotalGB / 1024).toFixed(2)} GB` : ''}
-${!isNA(data.cpuMultiCoreScore) ? `Pontuação CPU Multi-core: ${data.cpuMultiCoreScore}` : ''}
-${!isNA(data.internetUploadSpeedMbps) ? `Velocidade de Upload(Aproximado): ${data.internetUploadSpeedMbps} Mbps` : ''}
-${!isNA(data.internetDownloadSpeedMbps) ? `Velocidade de Download(Aproximado): ${data.internetDownloadSpeedMbps} Mbps` : ''}
+${buildLine('Versão do Windows', data.windowsVersion)}
+${buildLine('Versão do SQL Server', data.sqlVersion)}
+${buildLine('Nome do Processador', data.processorName)}
+${buildLine('Número de Cores/Núcleos', data.coreCount)}
+${buildLine('RAM Total', (data.totalRamGB / 1024).toFixed(2), ' GB')}
+${buildLine('RAM Alocada para SQL Server', data.sqlRamDisplay)}
+${buildLine('Tipo de Conexão', data.connectionType)}
+${buildLine('Velocidade de Leitura de Disco', data.diskReadSpeedMBps, ' MB/s')}
+${buildLine('Velocidade de Escrita de Disco', data.diskWriteSpeedMBps, ' MB/s')}
+${buildLine('Tipo de Disco', data.diskType)}
+${buildLine('Tamanho Total do Disco', (data.diskTotalGB / 1024).toFixed(2), ' GB')}
+${buildLine('Pontuação CPU Multi-core', data.cpuMultiCoreScore)}
+${buildLine('Velocidade de Upload(Aproximado)', data.internetUploadSpeedMbps, ' Mbps')}
+${buildLine('Velocidade de Download(Aproximado)', data.internetDownloadSpeedMbps, ' Mbps')}
+
+---
 
 ## Parâmetros do Mapeamento
-${!isNA(data.impressora) ? `Possui Impressora Matricial: ${data.impressora}` : ''}
-${!isNA(data.nfe) ? `Possui NFe Express: ${data.nfe}` : ''}
-${!isNA(data.ponto) ? `Utiliza NGPonto: ${data.ponto}` : ''}
-${!isNA(data.holos) ? `Utiliza Holos/People: ${data.holos}` : ''}
-${!isNA(data.vpn) ? `Precisa de VPN: ${data.vpn}` : ''}
-${!isNA(data.certificado) ? `Certificado Digital: ${data.certificado}` : ''}
-${!isNA(data.qtdUsuarios) ? `Quantidade de Usuários para acesso: ${data.qtdUsuarios}` : ''}
-${!isNA(data.codChamado) ? `Número do Chamado: ${data.codChamado}` : ''}
+${buildLine('Possui Impressora Matricial', data.impressora)}
+${buildLine('Possui NFe Express', data.nfe)}
+${buildLine('Utiliza NGPonto', data.ponto)}
+${buildLine('Utiliza Holos/People', data.holos)}
+${buildLine('Precisa de VPN', data.vpn)}
+${buildLine('Certificado Digital', data.certificado)}
+${buildLine('Quantidade de Usuários para acesso', data.qtdUsuarios)}
+${buildLine('Número do Chamado', data.codChamado)}
 
+---
 
 ## Resultado do mapeamento
 
 ### Ambiente Minimo:
-Tipo de Servidor: ${recommendations.tipoServidor}
-${!isNA(recommendations.vCPUMinimo) ? `Quantidade de vCPU: ${recommendations.vCPUMinimo}` : ''}
-Distribuição da RAM:
-${!isNA(recommendations.sqlServerMinimo) ? `  SQL Server: ${recommendations.sqlServerMinimo}` : ''}
-${!isNA(recommendations.windowsMinimo) ? `  Windows: ${recommendations.windowsMinimo}` : ''}
-${!isNA(recommendations.usuariosMinimo) ? `  Usuários: ${recommendations.usuariosMinimo}` : ''}
-${recommendations.botMinimo !== null ? `  BOT (Holos/People): ${recommendations.botMinimo}` : ''}
-${!isNA(recommendations.memoriaRamTotalMinimo) ? `Memória RAM Total: ${recommendations.memoriaRamTotalMinimo}` : ''}
-${!isNA(recommendations.sqlServerVersionMinimo) ? `Versão do SQL Server: ${recommendations.sqlServerVersionMinimo}` : ''}
-${!isNA(recommendations.armazenamento) ? `Armazenamento: ${recommendations.armazenamento}` : ''}
+${buildLine('Tipo de Servidor', recommendations.tipoServidor)}
+${buildLine('Quantidade de vCPU', recommendations.vCPUMinimo)}
+${buildRamDistribution(recommendations.sqlServerMinimo, recommendations.windowsMinimo, recommendations.usuariosMinimo, recommendations.botMinimo)}
+${buildLine('Memória RAM Total', recommendations.memoriaRamTotalMinimo)}
+${buildLine('Versão do SQL Server', recommendations.sqlServerVersionMinimo)}
+${buildLine('Armazenamento', recommendations.armazenamento)}
 
 ### Ambiente Recomendado:
-Tipo de Servidor: ${recommendations.tipoServidor}
-${!isNA(recommendations.vCPURecomendado) ? `Quantidade de vCPU: ${recommendations.vCPURecomendado}` : ''}
-Distribuição da RAM:
-${!isNA(recommendations.sqlServerRecomendado) ? `  SQL Server: ${recommendations.sqlServerRecomendado}` : ''}
-${!isNA(recommendations.windowsRecomendado) ? `  Windows: ${recommendations.windowsRecomendado}` : ''}
-${!isNA(recommendations.usuariosRecomendado) ? `  Usuários: ${recommendations.usuariosRecomendado}` : ''}
-${recommendations.botRecomendado !== null ? `  BOT (Holos/People): ${recommendations.botRecomendado}` : ''}
-${!isNA(recommendations.memoriaRamTotalRecomendado) ? `Memória RAM Total: ${recommendations.memoriaRamTotalRecomendado}` : ''}
-${!isNA(recommendations.sqlServerVersionRecomendado) ? `Versão do SQL Server: ${recommendations.sqlServerVersionRecomendado}` : ''}
-${!isNA(recommendations.armazenamento) ? `Armazenamento: ${recommendations.armazenamento}` : ''}
+${buildLine('Tipo de Servidor', recommendations.tipoServidor)}
+${buildLine('Quantidade de vCPU', recommendations.vCPURecomendado)}
+${buildRamDistribution(recommendations.sqlServerRecomendado, recommendations.windowsRecomendado, recommendations.usuariosRecomendado, recommendations.botRecomendado)}
+${buildLine('Memória RAM Total', recommendations.memoriaRamTotalRecomendado)}
+${buildLine('Versão do SQL Server', recommendations.sqlServerVersionRecomendado)}
+${buildLine('Armazenamento', recommendations.armazenamento)}
 
-Observações: ${recommendations.observacoes || 'Nenhuma observação.'}
+---
+
+Observações: 
+${recommendations.observacoes || 'Nenhuma observação.'}
 --------------------------------------------------
 `;
-        return report;
+        // Filtra linhas vazias e remove quebras de linha múltiplas para evitar espaçamento desnecessário
+        return report.split('\n').filter(line => line.trim() !== '').join('\n');
     }
 });
