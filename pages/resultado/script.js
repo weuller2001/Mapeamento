@@ -414,9 +414,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (sqlClientEdition.toLowerCase() !== 'express' && sqlClientEdition.toLowerCase() !== 'unknown') {
                 rec.observacoes += '\n- Cliente pode sentir perda de perfomance, pois seu SQL atual é entrega mais desempenho.';
             }
-            rec.observacoes += '\n- Micro servidor/aplicação: aplicar a clientes com muitos usuários (usar base de dados massiva). Verificar com o comercial o que é comercializado no momento da venda de novo usuário.';
-            rec.observacoes += '\n- Holos/People: não é vendido para a plataforma Play, deve ser migrado para o ambiente compartilhado.';
-            rec.observacoes += '\n- Clientes de ambiente compartilhado têm 2GB de espaço.';
 
 
         } else if (rec.tipoServidor === 'IaaS Cloud') {
@@ -461,7 +458,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.vpn === 'Sim') {
                 rec.observacoes += '\n- VPN: Verificar qual usuário utilizará a VPN (só é permitido 1 usuário na VPN).';
             }
-            rec.observacoes += '\n- Micro servidor/aplicação: aplicar a clientes com muitos usuários (usar base de dados massiva). Verificar com o comercial o que é comercializado no momento da venda de novo usuário.';
+
         }
 
         return rec;
