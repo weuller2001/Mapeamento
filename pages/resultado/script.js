@@ -424,7 +424,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             // Nova regra: IaaS Cloud sempre usa SQL Web. Comentário se cliente usa Express
             if (sqlClientEdition.toLowerCase() === 'express') {
-                rec.observacoes += '\n- SQL Server: Cliente pode sentir ganho de perfomance, pois seu SQL atual entrega menos desempenho em relação ao cloud (O IaaS Cloud utiliza SQL Server WEB).';
+                rec.observacoes += '\n- SQL Server: Cliente pode sentir ganho de perfomance, pois seu SQL atual entrega menos desempenho em relação ao cloud.';
             }
 
 
