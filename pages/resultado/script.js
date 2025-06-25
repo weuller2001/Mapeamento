@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Ex: 'https://seu-nome-do-proxy.onrender.com/api/adicionar-comentario-proxy';
                 // Ou: 'https://seu-nome-do-projeto.vercel.app/api/adicionar-comentario-proxy';
                 // ***************************************************************
-                const urlDoMeuBackendProxy = 'https://SEU_URL_DO_BACKEND_PROXY.com/api/adicionar-comentario-proxy'; 
+                const urlDoMeuBackendProxy = 'http://localhost:3000/api/adicionar-comentario-proxy'; 
                 // Exemplo: 'https://weuller2001-mastermaq-proxy.onrender.com/api/adicionar-comentario-proxy'
 
                 try {
