@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Habilitar o botão de download após os dados serem carregados
         if (processButton) {
-            processButton.addEventListener('click', async () => { // Adicionado 'async' aqui!
+            processButton.addEventListener('click', () => {
                 // ANTES DE GERAR O RELATÓRIO, CHAME A FUNÇÃO DE VALIDAÇÃO
                 if (!validateMappingParameters()) {
                     return; // Se a validação falhar, para a execução
@@ -97,6 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Calcula as recomendações
                 const recommendations = calculateRecommendations(finalReportData);
 
+<<<<<<< HEAD
                 const reportText = generateReportText(finalReportData, recommendations); // Este é o seu comentário!
                 
                 // ** AQUI COMEÇA A NOVA LÓGICA DE CHAMADA DA API **
@@ -165,6 +166,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 // ** FIM DA NOVA LÓGICA DE CHAMADA DA API **
 
+=======
+                const reportText = generateReportText(finalReportData, recommendations); // Passa as recomendações também
+                const blob = new Blob([reportText], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `relatorio_diagnostico_${new Date().toISOString().slice(0,10)}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+>>>>>>> parent of d6215f8 (API)
             });
         }
     } else {
@@ -194,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Para inputs de texto, .value.trim() está correto
         const qtdUsuarios = parseInt(document.getElementById('qtdUsuarios')?.value.trim()) || 0; // Converte para número inteiro, 0 se vazio
-        const codChamado = document.getElementById('codChamadoInput')?.value.trim(); // ATENÇÃO: Mudado para 'codChamadoInput' para consistência com o HTML anterior
+        const codChamado = document.getElementById('codChamado')?.value.trim();
 
         return {
             certificado,
@@ -204,7 +217,7 @@ document.addEventListener('DOMContentLoaded', function() {
             holos, // Manter como 'holos'
             vpn,
             qtdUsuarios,
-            codChamado // Este codChamado é para a validação e relatório, não para a API diretamente
+            codChamado
         };
     }
 
@@ -235,7 +248,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- Adicionar event listeners para os campos de texto aceitarem apenas números ---
     const qtdUsuariosInput = document.getElementById('qtdUsuarios');
-    const codChamadoInput = document.getElementById('codChamadoInput'); // ATENÇÃO: Mudado para 'codChamadoInput'
+    const codChamadoInput = document.getElementById('codChamado');
 
     if (qtdUsuariosInput) {
         qtdUsuariosInput.addEventListener('input', function(event) {
@@ -329,19 +342,19 @@ document.addEventListener('DOMContentLoaded', function() {
         // 2. Tentar NG Start (se não for Micro) - TODAS as condições devem ser VERDADEIRAS
         // Nova regra: se Holos/People estiver selecionado, NÃO pode ser NG Start
         else if (data.holos !== 'Sim' && // Condição para impedir NG Start se Holos for 'Sim'
-                     sqlMaiorBancoBaseMB <= FOUR_POINT_FIVE_GB_MB && // Banco <= 4.5GB E
-                     (mediaXMLmensal === 0 || mediaXMLmensal <= 1000) && // XML Mensal baixo (0 ou <= 1000) E
-                     (mediaXMLmensalVarejista === 0 || mediaXMLmensalVarejista <= 1000) && // XML Varejista baixo (0 ou <= 1000) E
-                     qtdUsuarios <= 3) { // Usuários <= 3
+                 sqlMaiorBancoBaseMB <= FOUR_POINT_FIVE_GB_MB && // Banco <= 4.5GB E
+                 (mediaXMLmensal === 0 || mediaXMLmensal <= 1000) && // XML Mensal baixo (0 ou <= 1000) E
+                 (mediaXMLmensalVarejista === 0 || mediaXMLmensalVarejista <= 1000) && // XML Varejista baixo (0 ou <= 1000) E
+                 qtdUsuarios <= 3) { // Usuários <= 3
             rec.tipoServidor = 'NG Start';
             rec.sqlServerVersionMinimo = 'Express'; // NG Start sempre Express
             rec.sqlServerVersionRecomendado = 'Express';
         }
         // 3. Tentar IaaS Cloud (se não for Micro nem NG Start) - QUALQUER UMA destas condições
         else if ((qtdUsuarios >= 4 && qtdUsuarios <= 6) || // Usuários entre 4 e 6 OU
-                     (sqlMaiorBancoBaseMB > FOUR_POINT_FIVE_GB_MB && sqlMaiorBancoBaseMB < TEN_GB_MB) || // Banco entre 4.5GB e 10GB OU
-                     (mediaXMLmensal > 1000 && mediaXMLmensal < 10000) || // XML Mensal entre 1000 e 10000 OU
-                     (mediaXMLmensalVarejista > 1000 && mediaXMLmensalVarejista < 10000)) { // XML Varejista entre 1000 e 10000
+                 (sqlMaiorBancoBaseMB > FOUR_POINT_FIVE_GB_MB && sqlMaiorBancoBaseMB < TEN_GB_MB) || // Banco entre 4.5GB e 10GB OU
+                 (mediaXMLmensal > 1000 && mediaXMLmensal < 10000) || // XML Mensal entre 1000 e 10000 OU
+                 (mediaXMLmensalVarejista > 1000 && mediaXMLmensalVarejista < 10000)) { // XML Varejista entre 1000 e 10000
             rec.tipoServidor = 'IaaS Cloud';
             rec.sqlServerVersionMinimo = 'Web'; // IaaS Cloud sempre Web
             rec.sqlServerVersionRecomendado = 'Web';
