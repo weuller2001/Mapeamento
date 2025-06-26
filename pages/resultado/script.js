@@ -96,78 +96,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Calcula as recomendações
                 const recommendations = calculateRecommendations(finalReportData);
-
-<<<<<<< HEAD
-                const reportText = generateReportText(finalReportData, recommendations); // Este é o seu comentário!
-                
-                // ** AQUI COMEÇA A NOVA LÓGICA DE CHAMADA DA API **
-                const statusMessageDiv = document.getElementById('statusMessage'); // Reutiliza ou cria um elemento para mensagens de status
-                statusMessageDiv.textContent = 'Enviando comentário para a API...';
-                statusMessageDiv.style.color = 'blue';
-
-                const codChamado = parseInt(document.getElementById('codChamadoInput').value); // Captura do input
-                const comentarioTexto = reportText; // O relatório completo é o comentário
-                const codUserFixo = 4276; // Código de usuário fixo
-
-                // Validação mínima para garantir que codChamado é um número válido
-                if (isNaN(codChamado) || !comentarioTexto.trim()) {
-                    statusMessageDiv.textContent = 'Erro: Código do Chamado ou Comentário inválidos.';
-                    statusMessageDiv.style.color = 'red';
-                    return;
-                }
-
-                // ***************************************************************
-                // SUBSTITUA PELA URL REAL DO SEU BACKEND PROXY (Render ou Vercel)
-                // Ex: 'https://seu-nome-do-proxy.onrender.com/api/adicionar-comentario-proxy';
-                // Ou: 'https://seu-nome-do-projeto.vercel.app/api/adicionar-comentario-proxy';
-                // ***************************************************************
-                const urlDoMeuBackendProxy = 'http://localhost:3000/api/adicionar-comentario-proxy'; 
-                // Exemplo: 'https://weuller2001-mastermaq-proxy.onrender.com/api/adicionar-comentario-proxy'
-
-                try {
-                    const response = await fetch(urlDoMeuBackendProxy, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            codChamado: codChamado,
-                            comentario: comentarioTexto, // O texto do relatório é o comentário
-                            codUser: codUserFixo
-                        })
-                    });
-
-                    if (response.ok) {
-                        const data = await response.json();
-                        statusMessageDiv.textContent = 'Comentário adicionado com sucesso!';
-                        statusMessageDiv.style.color = 'green';
-                        console.log('Resposta do seu proxy (sucesso):', data);
-                        // Opcional: Gerar o arquivo TXT localmente TAMBÉM após o envio da API
-                        const blob = new Blob([reportText], { type: 'text/plain' });
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = `relatorio_diagnostico_${new Date().toISOString().slice(0,10)}.txt`;
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        URL.revokeObjectURL(url);
-
-                    } else {
-                        const errorData = await response.json();
-                        statusMessageDiv.textContent = `Erro ao adicionar comentário: ${errorData.message || 'Erro desconhecido'}`;
-                        statusMessageDiv.style.color = 'red';
-                        console.error('Resposta do seu proxy (erro):', errorData);
-                    }
-                } catch (error) {
-                    statusMessageDiv.textContent = `Ocorreu um erro de rede: ${error.message}`;
-                    statusMessageDiv.style.color = 'red';
-                    console.error('Erro na requisição para o proxy:', error);
-                }
-                // ** FIM DA NOVA LÓGICA DE CHAMADA DA API **
-
-=======
-                const reportText = generateReportText(finalReportData, recommendations); // Passa as recomendações também
+				
+				const reportText = generateReportText(finalReportData, recommendations); // Passa as recomendações também
                 const blob = new Blob([reportText], { type: 'text/plain' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -177,7 +107,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
->>>>>>> parent of d6215f8 (API)
             });
         }
     } else {
@@ -342,19 +271,19 @@ document.addEventListener('DOMContentLoaded', function() {
         // 2. Tentar NG Start (se não for Micro) - TODAS as condições devem ser VERDADEIRAS
         // Nova regra: se Holos/People estiver selecionado, NÃO pode ser NG Start
         else if (data.holos !== 'Sim' && // Condição para impedir NG Start se Holos for 'Sim'
-                 sqlMaiorBancoBaseMB <= FOUR_POINT_FIVE_GB_MB && // Banco <= 4.5GB E
-                 (mediaXMLmensal === 0 || mediaXMLmensal <= 1000) && // XML Mensal baixo (0 ou <= 1000) E
-                 (mediaXMLmensalVarejista === 0 || mediaXMLmensalVarejista <= 1000) && // XML Varejista baixo (0 ou <= 1000) E
-                 qtdUsuarios <= 3) { // Usuários <= 3
+					sqlMaiorBancoBaseMB <= FOUR_POINT_FIVE_GB_MB && // Banco <= 4.5GB E
+                     (mediaXMLmensal === 0 || mediaXMLmensal <= 1000) && // XML Mensal baixo (0 ou <= 1000) E
+                     (mediaXMLmensalVarejista === 0 || mediaXMLmensalVarejista <= 1000) && // XML Varejista baixo (0 ou <= 1000) E
+                     qtdUsuarios <= 3) { // Usuários <= 3
             rec.tipoServidor = 'NG Start';
             rec.sqlServerVersionMinimo = 'Express'; // NG Start sempre Express
             rec.sqlServerVersionRecomendado = 'Express';
         }
         // 3. Tentar IaaS Cloud (se não for Micro nem NG Start) - QUALQUER UMA destas condições
         else if ((qtdUsuarios >= 4 && qtdUsuarios <= 6) || // Usuários entre 4 e 6 OU
-                 (sqlMaiorBancoBaseMB > FOUR_POINT_FIVE_GB_MB && sqlMaiorBancoBaseMB < TEN_GB_MB) || // Banco entre 4.5GB e 10GB OU
-                 (mediaXMLmensal > 1000 && mediaXMLmensal < 10000) || // XML Mensal entre 1000 e 10000 OU
-                 (mediaXMLmensalVarejista > 1000 && mediaXMLmensalVarejista < 10000)) { // XML Varejista entre 1000 e 10000
+					(sqlMaiorBancoBaseMB > FOUR_POINT_FIVE_GB_MB && sqlMaiorBancoBaseMB < TEN_GB_MB) || // Banco entre 4.5GB e 10GB OU
+                    (mediaXMLmensal > 1000 && mediaXMLmensal < 10000) || // XML Mensal entre 1000 e 10000 OU
+                    (mediaXMLmensalVarejista > 1000 && mediaXMLmensalVarejista < 10000)) { // XML Varejista entre 1000 e 10000
             rec.tipoServidor = 'IaaS Cloud';
             rec.sqlServerVersionMinimo = 'Web'; // IaaS Cloud sempre Web
             rec.sqlServerVersionRecomendado = 'Web';
