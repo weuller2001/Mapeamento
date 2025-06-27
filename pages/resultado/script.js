@@ -409,7 +409,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 rec.observacoes += '\n- Memória: Cliente pode sentir ganho de performance, pois sua memória atual possuí menos capacidade que a do cloud.';
             }
             if (sqlClientYear !== 0 && sqlClientYear < 2022) {
-                rec.observacoes += '\n- SQL Server: Cliente pode sentir ganho de perfomance, pois seu SQL atual está desatualizado.';
+                rec.observacoes += '\n- SQL Server: Cliente pode sentir ganho de performance, pois seu SQL atual está desatualizado.';
             }
             if (sqlClientEdition.toLowerCase() !== 'express' && sqlClientEdition.toLowerCase() !== 'unknown') {
                 rec.observacoes += '\n- SQL Server: Cliente pode sentir perda de perfomance, pois seu SQL atual é entrega mais desempenho.';
