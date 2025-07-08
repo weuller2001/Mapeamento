@@ -340,8 +340,8 @@ document.addEventListener('DOMContentLoaded', function() {
 				}
 			}
 			
-			rec.sqlServerMinimo = `${sqlMin} MB`;
-			rec.sqlServerRecomendado = `${sqlRec} MB`;
+			rec.sqlServerMinimo = `${sqlMin} GB`;
+			rec.sqlServerRecomendado = `${sqlRec} GB`;
 
 
 			usuariosMin = qtdUsuarios * 640;
