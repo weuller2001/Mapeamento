@@ -220,7 +220,7 @@ document.addEventListener('DOMContentLoaded', function() {
             memoriaRamTotalRecomendado: 'N/A',
             sqlServerVersionMinimo: 'N/A', // Será definido abaixo
             sqlServerVersionRecomendado: 'N/A', // Será definido abaixo
-            armazenamento: '140 GB', // Valor padrão para Micro
+            armazenamento: '140 GB', // Valor padrão para Dedicado
             observacoes: '' // Inicializa observações como string vazia
         };
 
@@ -253,9 +253,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
 
-        // --- Determinação do Tipo de Servidor (com nova hierarquia: Micro -> NG Start -> IaaS Cloud) ---
+        // --- Determinação do Tipo de Servidor (com nova hierarquia: Dedicado -> Basico -> Comum) ---
 
-        // 1. Tentar Micro (prioridade mais alta) - Qualquer uma das condições sendo verdadeira
+        // 1. Tentar Dedicado (prioridade mais alta) - Qualquer uma das condições sendo verdadeira
         if (sqlMaiorBancoBaseMB > TEN_GB_MB || 
             mediaXMLmensal > 10000 || 
             mediaXMLmensalVarejista > 10000 || 
@@ -264,28 +264,28 @@ document.addEventListener('DOMContentLoaded', function() {
             data.nfe === 'Sim' || 
             data.vpn === 'Sim' || 
             data.certificado === 'A3') { 
-            rec.tipoServidor = 'Micro';
+            rec.tipoServidor = 'Dedicado';
             rec.sqlServerVersionMinimo = baseRecommendedSqlServerVersion; // Usa a base recomendada
             rec.sqlServerVersionRecomendado = baseRecommendedSqlServerVersion;
         }
-        // 2. Tentar NG Start (se não for Micro) - TODAS as condições devem ser VERDADEIRAS
-        // Nova regra: se Holos/People estiver selecionado, NÃO pode ser NG Start
-        else if (data.holos !== 'Sim' && // Condição para impedir NG Start se Holos for 'Sim'
+        // 2. Tentar Basico (se não for Dedicado) - TODAS as condições devem ser VERDADEIRAS
+        // Nova regra: se Holos/People estiver selecionado, NÃO pode ser Basico
+        else if (data.holos !== 'Sim' && // Condição para impedir Basico se Holos for 'Sim'
 					sqlMaiorBancoBaseMB <= FOUR_POINT_FIVE_GB_MB && // Banco <= 4.5GB E
                      (mediaXMLmensal === 0 || mediaXMLmensal <= 1000) && // XML Mensal baixo (0 ou <= 1000) E
                      (mediaXMLmensalVarejista === 0 || mediaXMLmensalVarejista <= 1000) && // XML Varejista baixo (0 ou <= 1000) E
                      qtdUsuarios <= 3) { // Usuários <= 3
-            rec.tipoServidor = 'NG Start';
-            rec.sqlServerVersionMinimo = 'Express'; // NG Start sempre Express
+            rec.tipoServidor = 'Basico';
+            rec.sqlServerVersionMinimo = 'Express'; // Basico sempre Express
             rec.sqlServerVersionRecomendado = 'Express';
         }
-        // 3. Tentar IaaS Cloud (se não for Micro nem NG Start) - QUALQUER UMA destas condições
+        // 3. Tentar Comum (se não for Dedicado nem Basico) - QUALQUER UMA destas condições
         else if ((qtdUsuarios >= 4 && qtdUsuarios <= 6) || // Usuários entre 4 e 6 OU
 					(sqlMaiorBancoBaseMB > FOUR_POINT_FIVE_GB_MB && sqlMaiorBancoBaseMB < TEN_GB_MB) || // Banco entre 4.5GB e 10GB OU
                     (mediaXMLmensal > 1000 && mediaXMLmensal < 10000) || // XML Mensal entre 1000 e 10000 OU
                     (mediaXMLmensalVarejista > 1000 && mediaXMLmensalVarejista < 10000)) { // XML Varejista entre 1000 e 10000
-            rec.tipoServidor = 'IaaS Cloud';
-            rec.sqlServerVersionMinimo = 'Web'; // IaaS Cloud sempre Web
+            rec.tipoServidor = 'Comum';
+            rec.sqlServerVersionMinimo = 'Web'; // Comum sempre Web
             rec.sqlServerVersionRecomendado = 'Web';
         } else {
             rec.tipoServidor = 'Não classificado';
@@ -305,15 +305,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const windowsMinVal = 4096; 
         const windowsRecVal = 4096; 
 
-        // Definir armazenamento padrão de 2GB para não-Micro
-        if (rec.tipoServidor !== 'Micro') {
+        // Definir armazenamento padrão de 2GB para não-Dedicado
+        if (rec.tipoServidor !== 'Dedicado') {
             rec.armazenamento = '2 GB';
         }
 
 
-        if (rec.tipoServidor === 'Micro') {
-            rec.vCPUMinimo = Math.ceil(qtdUsuarios / 3.5); 
-            rec.vCPURecomendado = Math.ceil(qtdUsuarios / 2.5);
+        if (rec.tipoServidor === 'Dedicado') {
+            rec.vCPUMinimo = Math.ceil(qtdUsuarios / 2.5); 
+            rec.vCPURecomendado = Math.ceil(qtdUsuarios / 1.5);
 
             // Lógica de cálculo de SQL Server RAM baseada na versão e qtdUsuarios
             if (rec.sqlServerVersionRecomendado === 'Express') { // Usa a versão já definida para o tipo
@@ -355,9 +355,9 @@ document.addEventListener('DOMContentLoaded', function() {
             rec.memoriaRamTotalMinimo = `${sqlMin + windowsMinVal + usuariosMin + currentHolosBotMin} MB`;
             rec.memoriaRamTotalRecomendado = `${sqlRec + windowsRecVal + usuariosRec + currentHolosBotRec} MB`;
 
-        } else if (rec.tipoServidor === 'IaaS Cloud' || rec.tipoServidor === 'NG Start') {
-            // Para IaaS Cloud e NG Start, vamos definir os valores de RAM e vCPU como 'N/A'
-            // já que você só pediu cálculos específicos para 'Micro'.
+        } else if (rec.tipoServidor === 'Comum' || rec.tipoServidor === 'Basico') {
+            // Para Comum e Basico, vamos definir os valores de RAM e vCPU como 'N/A'
+            // já que você só pediu cálculos específicos para 'Dedicado'.
             rec.vCPUMinimo = 'N/A';
             rec.vCPURecomendado = 'N/A';
             rec.sqlServerMinimo = 'N/A';
@@ -396,13 +396,13 @@ document.addEventListener('DOMContentLoaded', function() {
             rec.observacoes += '\n- Cliente pode sentir perda de performance, pois seu disco atual é rápido em comparação ao do cloud.';
         }
 
-        // Ponto deve adicionar observação independente da classificação para Micro
+        // Ponto deve adicionar observação independente da classificação para Dedicado
         if (data.ponto === 'Sim') {
             rec.observacoes += '\n- NGPonto: Importações de ponto do relógio serão feitas manualmente, pois com o sistema em nuvem não é possível coletar automaticamente.';
         }
         
         // Observações específicas por Tipo de Servidor
-        if (rec.tipoServidor === 'NG Start') {
+        if (rec.tipoServidor === 'Basico') {
             if (totalRamGB > 8 * 1024) { // 8GB em MB
                 rec.observacoes += '\n- Memória: Cliente pode sentir perda de performance, pois sua memória atual possuí mais capacidade que a do cloud.';
             } else if (totalRamGB < 8 * 1024) {
@@ -416,40 +416,40 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
 
-        } else if (rec.tipoServidor === 'IaaS Cloud') {
+        } else if (rec.tipoServidor === 'Comum') {
             if (totalRamGB > 16 * 1024) { // 16GB em MB
                 rec.observacoes += '\n- Memória: Cliente pode sentir perda de performance, pois sua memória atual possuí mais capacidade que a do cloud.';
             } else if (totalRamGB < 16 * 1024) {
                 rec.observacoes += '\n- Memória: Cliente pode sentir ganho de performance, pois sua memória atual possuí menos capacidade que a do cloud.';
             }
-            // Nova regra: IaaS Cloud sempre usa SQL Web. Comentário se cliente usa Express
+            // Nova regra: Comum sempre usa SQL Web. Comentário se cliente usa Express
             if (sqlClientEdition.toLowerCase() === 'express') {
                 rec.observacoes += '\n- SQL Server: Cliente pode sentir ganho de perfomance, pois seu SQL atual entrega menos desempenho em relação ao cloud.';
             }
 
 
-        } else if (rec.tipoServidor === 'Micro') {
-            // Observações de Memória para Micro
+        } else if (rec.tipoServidor === 'Dedicado') {
+            // Observações de Memória para Dedicado
             const sqlServerMinimoVal = parseFloat(rec.sqlServerMinimo.replace(' MB', '')) || 0;
             if (totalRamGB < sqlServerMinimoVal) {
                 rec.observacoes += '\n- Memória: Cliente pode sentir ganho de performance, pois sua memória atual possuí menos capacidade que a do cloud (Mínimo para operação do ambiente).';
             }
             
-            // Observações de SQL Server para Micro
-            if (rec.sqlServerVersionRecomendado === 'Express') { // Usa a versão definida para Micro
+            // Observações de SQL Server para Dedicado
+            if (rec.sqlServerVersionRecomendado === 'Express') { // Usa a versão definida para Dedicado
                 if (sqlClientYear !== 0 && sqlClientYear < 2022) {
                     rec.observacoes += '\n- SQL Server: Cliente pode sentir ganho de perfomance, pois seu SQL atual está desatualizado.';
                 }
                 if (sqlClientEdition.toLowerCase() !== 'express' && sqlClientEdition.toLowerCase() !== 'unknown') { // se for Standard, Enterprise, etc.
-                    rec.observacoes += '\n- SQL Server: Cliente pode sentir perda de perfomance, pois seu SQL atual é entrega mais desempenho (pode ser ofertado o micro com SQL Web para ter mais desempenho).';
+                    rec.observacoes += '\n- SQL Server: Cliente pode sentir perda de perfomance, pois seu SQL atual é entrega mais desempenho (pode ser ofertado o Dedicado com SQL Web para ter mais desempenho).';
                 }
-            } else if (rec.sqlServerVersionRecomendado === 'Web') { // Micro com SQL Web
+            } else if (rec.sqlServerVersionRecomendado === 'Web') { // Dedicado com SQL Web
                 if (sqlClientEdition.toLowerCase() === 'express') {
                     rec.observacoes += '\n- SQL Server: Cliente pode sentir ganho de perfomance, pois seu SQL atual entrega menos desempenho em relação ao cloud.';
                 }
             }
 
-            // Observações de Mapeamento Específicas de Micro
+            // Observações de Mapeamento Específicas de Dedicado
             if (data.certificado === 'A3') {
                 rec.observacoes += '\n- Certificado Digital A3: Não são todos os certificados A3 que são compatíveis com o cloud, será necessário verificar o modelo.';
             }
