@@ -312,7 +312,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
         if (rec.tipoServidor === 'Dedicado') {
-            rec.vCPUMinimo = Math.ceil(qtdUsuarios / 2.5); 
+            rec.vCPUMinimo = Math.ceil(qtdUsuarios / 2); 
             rec.vCPURecomendado = Math.ceil(qtdUsuarios / 1.5);
 
             // Lógica de cálculo de SQL Server RAM baseada na versão e qtdUsuarios
