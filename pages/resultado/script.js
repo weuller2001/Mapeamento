@@ -304,6 +304,17 @@ document.addEventListener('DOMContentLoaded', function() {
         let holosBotRec = 0; 
         const windowsMinVal = 4096; 
         const windowsRecVal = 4096; 
+		
+		// Função auxiliar para arredondar MB para o próximo GB par
+		function roundUpToNextEvenGB(mbValue) {
+			if (mbValue === 0 || isNaN(mbValue)) return '0 GB'; // Garante "0 GB" para valores nulos/zero
+			const gbValue = mbValue / 1024; // Converte MB para GB
+			let roundedGb = Math.ceil(gbValue); // Arredonda para o próximo inteiro
+			if (roundedGb % 2 !== 0) { // Se for ímpar, adicione 1 para tornar par
+				roundedGb += 1;
+			}
+			return `${roundedGb} GB`;
+}
 
         // Definir armazenamento padrão de 2GB para não-Dedicado
         if (rec.tipoServidor !== 'Dedicado') {
@@ -312,65 +323,70 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
         if (rec.tipoServidor === 'Dedicado') {
-            rec.vCPUMinimo = Math.ceil(qtdUsuarios / 2); 
-            rec.vCPURecomendado = Math.ceil(qtdUsuarios / 1.5);
+			rec.vCPUMinimo = Math.ceil(qtdUsuarios / 2); 
+			rec.vCPURecomendado = Math.ceil(qtdUsuarios / 1.5);
 
-            // Lógica de cálculo de SQL Server RAM baseada na versão e qtdUsuarios
-            if (rec.sqlServerVersionRecomendado === 'Express') { // Usa a versão já definida para o tipo
-                sqlMin = 3072; // 3GB para Express
-                sqlRec = 3072;
-            } else { // Versão é 'Web'
-                if (qtdUsuarios > 6) {
-                    sqlMin = 3584 + ((qtdUsuarios - 6) * 384);
-                    sqlRec = 3584 + ((qtdUsuarios - 6) * 768);
-                } else {
-                    sqlMin = 3584;
-                    sqlRec = 3584;
-                }
-            }
-            rec.sqlServerMinimo = `${sqlMin} MB`;
-            rec.sqlServerRecomendado = `${sqlRec} MB`;
+			// Lógica de cálculo de SQL Server RAM baseada na versão e qtdUsuarios
+			if (rec.sqlServerVersionRecomendado === 'Express') { // Usa a versão já definida para o tipo
+				sqlMin = 3072 / 1024; // 3GB para Express
+				sqlRec = 3072 / 1024;
+			} else { // Versão é 'Web'
+				if (qtdUsuarios > 6) {
+					sqlMin = 3584 + ((qtdUsuarios - 6) * 384) / 1024;
+					sqlRec = 3584 + ((qtdUsuarios - 6) * 768) / 1024;
+				} else {
+					sqlMin = 3584 / 1024;
+					rec = 3584 / 1024; // Corrigido aqui, estava 'rec = 3584' deveria ser 'sqlRec = 3584'
+				}
+			}
+			
+			rec.sqlServerMinimo = `${sqlMin} MB`;
+			rec.sqlServerRecomendado = `${sqlRec} MB`;
 
 
-            usuariosMin = qtdUsuarios * 640;
-            usuariosRec = qtdUsuarios * 1024;
-            rec.usuariosMinimo = `${usuariosMin} MB`;
-            rec.usuariosRecomendado = `${usuariosRec} MB`;
+			usuariosMin = qtdUsuarios * 640;
+			usuariosRec = qtdUsuarios * 1024;
+			rec.usuariosMinimo = `${usuariosMin} MB`;
+			rec.usuariosRecomendado = `${usuariosRec} MB`;
 
-            // Lógica para "BOT" baseada em Holos/People
-            if (data.holos === 'Sim') { 
-                holosBotMin = 2048;
-                holosBotRec = 2048;
-                rec.botMinimo = `${holosBotMin} MB`;
-                rec.botRecomendado = `${holosBotRec} MB`;
-            } else {
-                rec.botMinimo = null; 
-                rec.botRecomendado = null;
-            }
+			// Lógica para "BOT" baseada em Holos/People
+			if (data.holos === 'Sim') { 
+				holosBotMin = 2048;
+				holosBotRec = 2048;
+				rec.botMinimo = `${holosBotMin} MB`;
+				rec.botRecomendado = `${holosBotRec} MB`;
+			} else {
+				rec.botMinimo = null; 
+				rec.botRecomendado = null;
+			}
 
             // Memória RAM Total (usando os valores numéricos)
             const currentHolosBotMin = (data.holos === 'Sim' ? holosBotMin : 0);
             const currentHolosBotRec = (data.holos === 'Sim' ? holosBotRec : 0);
 
-            rec.memoriaRamTotalMinimo = `${sqlMin + windowsMinVal + usuariosMin + currentHolosBotMin} MB`;
-            rec.memoriaRamTotalRecomendado = `${sqlRec + windowsRecVal + usuariosRec + currentHolosBotRec} MB`;
+            const totalRamMinMB = sqlMin + windowsMinVal + usuariosMin + currentHolosBotMin;
+			const totalRamRecMB = sqlRec + windowsRecVal + usuariosRec + currentHolosBotRec;
 
-        } else if (rec.tipoServidor === 'Comum' || rec.tipoServidor === 'Basico') {
-            // Para Comum e Basico, vamos definir os valores de RAM e vCPU como 'N/A'
-            // já que você só pediu cálculos específicos para 'Dedicado'.
-            rec.vCPUMinimo = 'N/A';
-            rec.vCPURecomendado = 'N/A';
-            rec.sqlServerMinimo = 'N/A';
-            rec.sqlServerRecomendado = 'N/A';
-            rec.usuariosMinimo = 'N/A';
-            rec.usuariosRecomendado = 'N/A';
-            rec.botMinimo = null; 
-            rec.botRecomendado = null; 
-            rec.memoriaRamTotalMinimo = 'N/A';
-            rec.memoriaRamTotalRecomendado = 'N/A';
-            rec.windowsMinimo = 'N/A'; 
-            rec.windowsRecomendado = 'N/A'; 
-        }
+			// Aplica a nova função de arredondamento para a RAM Total
+			rec.memoriaRamTotalMinimo = roundUpToNextEvenGB(totalRamMinMB);
+			rec.memoriaRamTotalRecomendado = roundUpToNextEvenGB(totalRamRecMB);
+
+		} else if (rec.tipoServidor === 'Comum' || rec.tipoServidor === 'Basico') {
+			// Para Comum e Basico, vamos definir os valores de RAM e vCPU como 'N/A'
+			// já que você só pediu cálculos específicos para 'Dedicado'.
+			rec.vCPUMinimo = 'N/A';
+			rec.vCPURecomendado = 'N/A';
+			rec.sqlServerMinimo = 'N/A';
+			rec.sqlServerRecomendado = 'N/A';
+			rec.usuariosMinimo = 'N/A';
+			rec.usuariosRecomendado = 'N/A';
+			rec.botMinimo = null; 
+			rec.botRecomendado = null; 
+			rec.memoriaRamTotalMinimo = 'N/A';
+			rec.memoriaRamTotalRecomendado = 'N/A';
+			rec.windowsMinimo = 'N/A'; 
+			rec.windowsRecomendado = 'N/A'; 
+		}
         // Se for "Não classificado", os valores já estão como 'N/A' (ou null para BOT) no início do rec,
         // então não precisamos de um 'else' adicional aqui.
 
