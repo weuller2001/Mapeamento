@@ -116,10 +116,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 emailjs.send(serviceID, templateID, templateParams)
                     .then(function(response) {
                         console.log('E-mail enviado com sucesso!', response.status, response.text);
-                        alert('Relatório gerado e e-mail enviado com sucesso!');
+                        alert('Mapeamento Concluído');
                     }, function(error) {
                         console.error('Erro ao enviar o e-mail:', error);
-                        alert('Houve um erro ao enviar o e-mail. O relatório será baixado, mas por favor, verifique suas configurações no EmailJS.');
+                        alert('Houve um erro ao enviar o e-mail. Verifique suas configurações no EmailJS.');
                     });
 				
 				//Bloco de download
