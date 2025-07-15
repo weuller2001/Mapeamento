@@ -122,6 +122,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         alert('Houve um erro ao enviar o e-mail. O relatório será baixado, mas por favor, verifique suas configurações no EmailJS.');
                     });
 				
+				//Bloco de download
+				/*
                 const blob = new Blob([reportText], { type: 'text/plain' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -131,8 +133,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
+				*/
             });
-        }
+        }		
     } else {
         loadingMessage.textContent = "Nenhum dado válido encontrado na URL. Certifique-se de que o agente foi executado corretamente.";
         // Desabilitar o botão de download se não houver dados
