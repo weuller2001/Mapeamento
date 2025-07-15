@@ -98,6 +98,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 const recommendations = calculateRecommendations(finalReportData);
 				
 				const reportText = generateReportText(finalReportData, recommendations); // Passa as recomendações também
+				
+				//configuração de disparo de email com o emailJS - EMAILJS SÓ PERMITE 200 ENVIOS MENSAIS
+				
+				const serviceID = 'service_zf214ci'; // SUBSTITUA PELO SEU SERVICE ID
+                const templateID = 'template_m7nu82b'; // SUBSTITUA PELO SEU TEMPLATE ID
+
+                const templateParams = {
+                    clienteInfo: finalReportData.clienteInfo || 'Cliente Não Informado',
+                    report_content: reportText,
+                };
+
+                emailjs.send(serviceID, templateID, templateParams)
+                    .then(function(response) {
+                        console.log('E-mail enviado com sucesso!', response.status, response.text);
+                        alert('Relatório gerado e e-mail enviado com sucesso!');
+                    }, function(error) {
+                        console.error('Erro ao enviar o e-mail:', error);
+                        alert('Houve um erro ao enviar o e-mail. O relatório será baixado, mas por favor, verifique suas configurações no EmailJS.');
+                    });
+				
                 const blob = new Blob([reportText], { type: 'text/plain' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
