@@ -82,11 +82,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Habilitar o botão de download após os dados serem carregados
         if (processButton) {
-            processButton.addEventListener('click', () => {
-                // ANTES DE GERAR O RELATÓRIO, CHAME A FUNÇÃO DE VALIDAÇÃO
-                if (!validateMappingParameters()) {
-                    return; // Se a validação falhar, para a execução
-                }
+            console.log('Botão de processamento encontrado e event listener anexado!'); // Log de verificação
+            processButton.addEventListener('click', () => {
+                console.log('Botão clicado! Iniciando o processamento...'); // Log de verificação
+
+                // ANTES DE GERAR O RELATÓRIO, CHAME A FUNÇÃO DE VALIDAÇÃO
+                if (!validateMappingParameters()) {
+                    return; // Se a validação falhar, para a execução
+                }
 
                 // Coleta os dados dos campos de mapeamento preenchidos pelo usuário
                 const mappingData = getMappingParameters();
