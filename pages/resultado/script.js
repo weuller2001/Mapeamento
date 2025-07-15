@@ -104,13 +104,18 @@ document.addEventListener('DOMContentLoaded', function() {
 				
 				//configuração de disparo de email com o emailJS - EMAILJS SÓ PERMITE 200 ENVIOS MENSAIS
 				
+				
 				const serviceID = 'service_zf214ci'; // SUBSTITUA PELO SEU SERVICE ID
                 const templateID = 'template_m7nu82b'; // SUBSTITUA PELO SEU TEMPLATE ID
+				
+				const clienteInfoCompleto = finalReportData.clienteInfo || 'Cliente Não Informado';
+				const clienteCodigo = clienteInfoCompleto.match(/^\d+/)?.[0] || 'N/A';
 
                 const templateParams = {
                     clienteInfo: finalReportData.clienteInfo || 'Cliente Não Informado',
                     report_content: reportText,
 					codChamado: finalReportData.codChamado
+					clienteCodigo: clienteCodigo
                 };
 
                 emailjs.send(serviceID, templateID, templateParams)
