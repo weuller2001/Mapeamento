@@ -110,6 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const templateParams = {
                     clienteInfo: finalReportData.clienteInfo || 'Cliente Não Informado',
                     report_content: reportText,
+					codChamado: finalReportData.codChamado
                 };
 
                 emailjs.send(serviceID, templateID, templateParams)
