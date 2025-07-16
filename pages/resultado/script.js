@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Para inputs de texto, .value.trim() está correto
         const qtdUsuarios = parseInt(document.getElementById('qtdUsuarios')?.value.trim()) || 0; // Converte para número inteiro, 0 se vazio
-        const codChamado = document.getElementById('codChamado')?.value.trim();
+        //const codChamado = document.getElementById('codChamado')?.value.trim();
 
         return {
             certificado,
@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function() {
             holos, // Manter como 'holos'
             vpn,
             qtdUsuarios,
-            codChamado
+            //codChamado
         };
     }
 
@@ -197,7 +197,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Verifica campos de texto
         // Note: qtdUsuarios já é 0 se estiver vazio, então a validação aqui é se é > 0
         if (mappingData.qtdUsuarios === 0) missingFields.push('Quantidade de Usuários');
-        if (!mappingData.codChamado) missingFields.push('Número do Chamado');
+        //if (!mappingData.codChamado) missingFields.push('Número do Chamado');
 
         if (missingFields.length > 0) {
             alert('Por favor, preencha os seguintes campos antes de prosseguir:\n\n- ' + missingFields.join('\n- '));
@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- Adicionar event listeners para os campos de texto aceitarem apenas números ---
     const qtdUsuariosInput = document.getElementById('qtdUsuarios');
-    const codChamadoInput = document.getElementById('codChamado');
+    
 
     if (qtdUsuariosInput) {
         qtdUsuariosInput.addEventListener('input', function(event) {
@@ -216,13 +216,16 @@ document.addEventListener('DOMContentLoaded', function() {
             this.value = this.value.replace(/[^0-9]/g, '');
         });
     }
-
+	
+	// Campo codChamado
+	/* const codChamadoInput = document.getElementById('codChamado');
     if (codChamadoInput) {
         codChamadoInput.addEventListener('input', function(event) {
             // Remove qualquer coisa que não seja dígito
             this.value = this.value.replace(/[^0-9]/g, '');
         });
     }
+	*/
 
     // Helper para extrair o ano e a edição do SQL Server
     function parseSqlServerVersion(sqlVersionString) {
@@ -608,7 +611,7 @@ Data da Coleta: ${new Date().toLocaleString()}`);
             buildLine('Precisa de VPN', data.vpn),
             buildLine('Certificado Digital', data.certificado),
             buildLine('Quantidade de Usuários para acesso', data.qtdUsuarios),
-            buildLine('Número do Chamado', data.codChamado)
+            //buildLine('Número do Chamado', data.codChamado)
         ].filter(line => line !== '');
         if (mappingDataLines.length > 0) {
             reportParts.push(`---
