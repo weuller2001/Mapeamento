@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     .then(function(response) {
                         console.log('E-mail enviado com sucesso!', response.status, response.text);
                         alert('Mapeamento Concluído');
-						window.location.href = '../concluido/concluido.html';
+						window.location.href = '../../concluido/concluido.html';
                     }, function(error) {
                         console.error('Erro ao enviar o e-mail:', error);
                         alert('Houve um erro ao enviar o e-mail. Verifique suas configurações no EmailJS.');
