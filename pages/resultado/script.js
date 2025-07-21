@@ -292,8 +292,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // 1. Tentar Dedicado (prioridade mais alta) - Qualquer uma das condições sendo verdadeira
         if (sqlMaiorBancoBaseMB > TEN_GB_MB || 
-            mediaXMLmensal > 10000 || 
-            mediaXMLmensalVarejista > 10000 || 
+            mediaXMLmensal > 7000 || 
+            mediaXMLmensalVarejista > 7000 || 
             qtdUsuarios >= 7 || 
             data.impressora === 'Sim' || 
             data.nfe === 'Sim' || 
@@ -317,8 +317,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // 3. Tentar Comum (se não for Dedicado nem Basico) - QUALQUER UMA destas condições
         else if ((qtdUsuarios >= 4 && qtdUsuarios <= 6) || // Usuários entre 4 e 6 OU
 					(sqlMaiorBancoBaseMB > FOUR_POINT_FIVE_GB_MB && sqlMaiorBancoBaseMB < TEN_GB_MB) || // Banco entre 4.5GB e 10GB OU
-                    (mediaXMLmensal > 1000 && mediaXMLmensal < 10000) || // XML Mensal entre 1000 e 10000 OU
-                    (mediaXMLmensalVarejista > 1000 && mediaXMLmensalVarejista < 10000)) { // XML Varejista entre 1000 e 10000
+                    (mediaXMLmensal > 1000 && mediaXMLmensal < 7000) || // XML Mensal entre 1000 e 10000 OU
+                    (mediaXMLmensalVarejista > 1000 && mediaXMLmensalVarejista < 7000)) { // XML Varejista entre 1000 e 10000
             rec.tipoServidor = 'Comum';
             rec.sqlServerVersionMinimo = 'Web'; // Comum sempre Web
             rec.sqlServerVersionRecomendado = 'Web';
@@ -367,8 +367,8 @@ document.addEventListener('DOMContentLoaded', function() {
 				sqlRec = 3072 / 1024;
 			} else { // Versão é 'Web'
 				if (qtdUsuarios > 6) {
-					sqlMin = 3584 + ((qtdUsuarios - 6) * 384) / 1024;
-					sqlRec = 3584 + ((qtdUsuarios - 6) * 768) / 1024;
+					sqlMin = 3584 + ((qtdUsuarios - 6) * 512) / 1024;
+					sqlRec = 3584 + ((qtdUsuarios - 6) * 896) / 1024;
 				} else {
 					sqlMin = 3584 / 1024;
 					rec = 3584 / 1024; // Corrigido aqui, estava 'rec = 3584' deveria ser 'sqlRec = 3584'
@@ -379,8 +379,8 @@ document.addEventListener('DOMContentLoaded', function() {
 			rec.sqlServerRecomendado = `${sqlRec} GB`;
 
 
-			usuariosMin = qtdUsuarios * 640;
-			usuariosRec = qtdUsuarios * 1024;
+			usuariosMin = qtdUsuarios * 896;
+			usuariosRec = qtdUsuarios * 1280;
 			rec.usuariosMinimo = `${usuariosMin} MB`;
 			rec.usuariosRecomendado = `${usuariosRec} MB`;
 
