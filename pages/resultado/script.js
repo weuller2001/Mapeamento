@@ -371,7 +371,7 @@ document.addEventListener('DOMContentLoaded', function() {
 					sqlRec = 3584 + ((qtdUsuarios - 6) * 896) / 1024;
 				} else {
 					sqlMin = 3584 / 1024;
-					rec = 3584 / 1024; // Corrigido aqui, estava 'rec = 3584' deveria ser 'sqlRec = 3584'
+					sqlRec = 3584 / 1024; // Corrigido aqui, estava 'rec = 3584' deveria ser 'sqlRec = 3584'
 				}
 			}
 			
