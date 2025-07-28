@@ -555,7 +555,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let reportParts = [];
 
-    reportParts.push(`<h2>Relatório de Diagnóstico de Sistema e SQL</h2>`);
+    reportParts.push(`<h5>Relatório de Diagnóstico de Sistema e SQL</h5>`);
 
     // ## Resultado do Mapeamento
     let resultMappingParts = [];
@@ -570,7 +570,7 @@ document.addEventListener('DOMContentLoaded', function() {
     ].filter(line => line !== '');
 
     if (minLines.length > 0) {
-        resultMappingParts.push(`<h3 style="margin-bottom:8px;">Ambiente Mínimo</h3><ul style="margin-top:0;">${minLines.join('')}</ul>`);
+        resultMappingParts.push(`<h5 style="margin-bottom:8px;">Ambiente Mínimo</h5><ul style="margin-top:0;">${minLines.join('')}</ul>`);
     }
 
     // Ambiente Recomendado
@@ -583,16 +583,16 @@ document.addEventListener('DOMContentLoaded', function() {
     ].filter(line => line !== '');
 
     if (recLines.length > 0) {
-        resultMappingParts.push(`<h3 style="margin-bottom:8px;">Ambiente Recomendado</h3><ul style="margin-top:0;">${recLines.join('')}</ul>`);
+        resultMappingParts.push(`<h5 style="margin-bottom:8px;">Ambiente Recomendado</h5><ul style="margin-top:0;">${recLines.join('')}</ul>`);
     }
 
     if (resultMappingParts.length > 0) {
-        reportParts.push(`<h3 style="margin-bottom:8px;">Resultado do Mapeamento</h3>${resultMappingParts.join('')}`);
+        reportParts.push(`<h5 style="margin-bottom:8px;">Resultado do Mapeamento</h5>${resultMappingParts.join('')}`);
     }
 
     // Observações
     reportParts.push(
-        `<h3 style="margin-bottom:8px;">Observações</h3><ul style="margin-top:0;">${
+        `<h5 style="margin-bottom:8px;">Observações</h5><ul style="margin-top:0;">${
             !isNA(recommendations.observacoes)
                 ? recommendations.observacoes.split('\n').map(obs => `<li>${obs}</li>`).join('')
                 : '<li>Nenhuma observação.</li>'
@@ -614,7 +614,7 @@ document.addEventListener('DOMContentLoaded', function() {
     ].filter(line => line !== '');
 
     if (clientDataLines.length > 0) {
-        reportParts.push(`<h3 style="margin-bottom:8px;">Dados do Cliente e Empresas</h3><ul style="margin-top:0;">${clientDataLines.join('')}</ul>`);
+        reportParts.push(`<h5 style="margin-bottom:8px;">Dados do Cliente e Empresas</h5><ul style="margin-top:0;">${clientDataLines.join('')}</ul>`);
     }
 
     // ## Parâmetros do Mapeamento
@@ -627,7 +627,7 @@ document.addEventListener('DOMContentLoaded', function() {
     ].filter(line => line !== '');
 
     if (mappingDataLines.length > 0) {
-        reportParts.push(`<h3 style="margin-bottom:8px;">Parâmetros do Mapeamento</h3><ul style="margin-top:0;">${mappingDataLines.join('')}</ul>`);
+        reportParts.push(`<h5 style="margin-bottom:8px;">Parâmetros do Mapeamento</h5><ul style="margin-top:0;">${mappingDataLines.join('')}</ul>`);
     }
 
     // ## Dados do Ambiente
@@ -649,7 +649,7 @@ document.addEventListener('DOMContentLoaded', function() {
     ].filter(line => line !== '');
 
     if (envDataLines.length > 0) {
-        reportParts.push(`<h3 style="margin-bottom:8px;">Dados do Ambiente (SO, Hardware e SQL Server)</h3><ul style="margin-top:0;">${envDataLines.join('')}</ul>`);
+        reportParts.push(`<h5 style="margin-bottom:8px;">Dados do Ambiente (SO, Hardware e SQL Server)</h5><ul style="margin-top:0;">${envDataLines.join('')}</ul>`);
     }
 
     // Junta todas as seções com um <hr> visual limpo
