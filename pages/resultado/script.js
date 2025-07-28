@@ -555,7 +555,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let reportParts = [];
 
-    reportParts.push(`<h2>Relatório de Diagnóstico de Sistema e SQL</h2><p><strong>Data da Coleta:</strong> ${new Date().toLocaleString()}</p>`);
+    reportParts.push(`<h2>Relatório de Diagnóstico de Sistema e SQL</h2>`);
 
     // ## Resultado do Mapeamento
     let resultMappingParts = [];
