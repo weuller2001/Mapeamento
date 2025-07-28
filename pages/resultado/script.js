@@ -612,7 +612,7 @@ Data da Coleta: ${new Date().toLocaleString()}`);
             buildLine('Utiliza Holos/People', data.holos),
             buildLine('Precisa de VPN', data.vpn),
             //buildLine('Certificado Digital', data.certificado),
-            buildLine('Quantidade de Usuários para acesso', data.qtdUsuarios)
+            buildLine('Quantidade de Usuários para acesso', data.qtdUsuarios),
             //buildLine('Número do Chamado', data.codChamado)
         ].filter(line => line !== '');
         if (mappingDataLines.length > 0) {
