@@ -442,54 +442,54 @@ document.addEventListener('DOMContentLoaded', function() {
         // --- Adicionar Observações ---
         // Observações gerais do ambiente (aplicáveis a todos os tipos de servidor)
         if (cpuMultiCoreScore > 1000000) {
-            rec.observacoes += '\n- Cliente pode sentir perda de performance, pois seu processador atual possuí mais desempenho que o do cloud.';
+            rec.observacoes += '\n Cliente pode sentir perda de performance, pois seu processador atual possuí mais desempenho que o do cloud.';
         } else if (cpuMultiCoreScore < 1000000) {
-            rec.observacoes += '\n- Cliente pode sentir ganho de performance, pois seu processador atual possuí menos desempenho que o do cloud.';
+            rec.observacoes += '\n Cliente pode sentir ganho de performance, pois seu processador atual possuí menos desempenho que o do cloud.';
         }
 
         if (connectionType.toLowerCase() === 'wifi') {
-            rec.observacoes += '\n- Cliente pode ter instabilidades no acesso por utilizar a conexão Wifi, indica-lo a usar sempre conexão cabeada.';
+            rec.observacoes += '\n Cliente pode ter instabilidades no acesso por utilizar a conexão Wifi, indica-lo a usar sempre conexão cabeada.';
         }
 
         if (internetDownloadSpeedMbps < 15) {
-            rec.observacoes += '\n- Cliente pode ter instabilidades no acesso por sua internet ser lenta.';
+            rec.observacoes += '\n Cliente pode ter instabilidades no acesso por sua internet ser lenta.';
         }
 
         if (diskReadSpeedMBps < 5500 && diskWriteSpeedMBps < 2700) {
-            rec.observacoes += '\n- Cliente pode sentir ganho de performance, pois seu disco atual é lento em comparação ao do cloud.';
+            rec.observacoes += '\n Cliente pode sentir ganho de performance, pois seu disco atual é lento em comparação ao do cloud.';
         } else if (diskReadSpeedMBps > 5500 && diskWriteSpeedMBps > 2700) {
-            rec.observacoes += '\n- Cliente pode sentir perda de performance, pois seu disco atual é rápido em comparação ao do cloud.';
+            rec.observacoes += '\n Cliente pode sentir perda de performance, pois seu disco atual é rápido em comparação ao do cloud.';
         }
 
         // Ponto deve adicionar observação independente da classificação para Dedicado
         if (data.ponto === 'Sim') {
-            rec.observacoes += '\n- NGPonto: Importações de ponto do relógio serão feitas manualmente, pois com o sistema em nuvem não é possível coletar automaticamente.';
+            rec.observacoes += '\n NGPonto: Importações de ponto do relógio serão feitas manualmente, pois com o sistema em nuvem não é possível coletar automaticamente.';
         }
         
         // Observações específicas por Tipo de Servidor
         if (rec.tipoServidor === 'Basico') {
             if (totalRamGB > 8 * 1024) { // 8GB em MB
-                rec.observacoes += '\n- Memória: Cliente pode sentir perda de performance, pois sua memória atual possuí mais capacidade que a do cloud.';
+                rec.observacoes += '\n Memória: Cliente pode sentir perda de performance, pois sua memória atual possuí mais capacidade que a do cloud.';
             } else if (totalRamGB < 8 * 1024) {
-                rec.observacoes += '\n- Memória: Cliente pode sentir ganho de performance, pois sua memória atual possuí menos capacidade que a do cloud.';
+                rec.observacoes += '\n Memória: Cliente pode sentir ganho de performance, pois sua memória atual possuí menos capacidade que a do cloud.';
             }
             if (sqlClientYear !== 0 && sqlClientYear < 2022) {
-                rec.observacoes += '\n- SQL Server: Cliente pode sentir ganho de performance, pois seu SQL atual está desatualizado.';
+                rec.observacoes += '\n SQL Server: Cliente pode sentir ganho de performance, pois seu SQL atual está desatualizado.';
             }
             if (sqlClientEdition.toLowerCase() !== 'express' && sqlClientEdition.toLowerCase() !== 'unknown') {
-                rec.observacoes += '\n- SQL Server: Cliente pode sentir perda de perfomance, pois seu SQL atual é entrega mais desempenho.';
+                rec.observacoes += '\n SQL Server: Cliente pode sentir perda de perfomance, pois seu SQL atual é entrega mais desempenho.';
             }
 
 
         } else if (rec.tipoServidor === 'Comum') {
             if (totalRamGB > 16 * 1024) { // 16GB em MB
-                rec.observacoes += '\n- Memória: Cliente pode sentir perda de performance, pois sua memória atual possuí mais capacidade que a do cloud.';
+                rec.observacoes += '\n Memória: Cliente pode sentir perda de performance, pois sua memória atual possuí mais capacidade que a do cloud.';
             } else if (totalRamGB < 16 * 1024) {
-                rec.observacoes += '\n- Memória: Cliente pode sentir ganho de performance, pois sua memória atual possuí menos capacidade que a do cloud.';
+                rec.observacoes += '\n Memória: Cliente pode sentir ganho de performance, pois sua memória atual possuí menos capacidade que a do cloud.';
             }
             // Nova regra: Comum sempre usa SQL Web. Comentário se cliente usa Express
             if (sqlClientEdition.toLowerCase() === 'express') {
-                rec.observacoes += '\n- SQL Server: Cliente pode sentir ganho de perfomance, pois seu SQL atual entrega menos desempenho em relação ao cloud.';
+                rec.observacoes += '\n SQL Server: Cliente pode sentir ganho de perfomance, pois seu SQL atual entrega menos desempenho em relação ao cloud.';
             }
 
 
@@ -497,38 +497,38 @@ document.addEventListener('DOMContentLoaded', function() {
             // Observações de Memória para Dedicado
             const sqlServerMinimoVal = parseFloat(rec.sqlServerMinimo.replace(' MB', '')) || 0;
             if (totalRamGB < sqlServerMinimoVal) {
-                rec.observacoes += '\n- Memória: Cliente pode sentir ganho de performance, pois sua memória atual possuí menos capacidade que a do cloud (Mínimo para operação do ambiente).';
+                rec.observacoes += '\n Memória: Cliente pode sentir ganho de performance, pois sua memória atual possuí menos capacidade que a do cloud (Mínimo para operação do ambiente).';
             }
             
             // Observações de SQL Server para Dedicado
             if (rec.sqlServerVersionRecomendado === 'Express') { // Usa a versão definida para Dedicado
                 if (sqlClientYear !== 0 && sqlClientYear < 2022) {
-                    rec.observacoes += '\n- SQL Server: Cliente pode sentir ganho de perfomance, pois seu SQL atual está desatualizado.';
+                    rec.observacoes += '\n SQL Server: Cliente pode sentir ganho de perfomance, pois seu SQL atual está desatualizado.';
                 }
                 if (sqlClientEdition.toLowerCase() !== 'express' && sqlClientEdition.toLowerCase() !== 'unknown') { // se for Standard, Enterprise, etc.
-                    rec.observacoes += '\n- SQL Server: Cliente pode sentir perda de perfomance, pois seu SQL atual é entrega mais desempenho (pode ser ofertado o Dedicado com SQL Web para ter mais desempenho).';
+                    rec.observacoes += '\n SQL Server: Cliente pode sentir perda de perfomance, pois seu SQL atual é entrega mais desempenho (pode ser ofertado o Dedicado com SQL Web para ter mais desempenho).';
                 }
             } else if (rec.sqlServerVersionRecomendado === 'Web') { // Dedicado com SQL Web
                 if (sqlClientEdition.toLowerCase() === 'express') {
-                    rec.observacoes += '\n- SQL Server: Cliente pode sentir ganho de perfomance, pois seu SQL atual entrega menos desempenho em relação ao cloud.';
+                    rec.observacoes += '\n SQL Server: Cliente pode sentir ganho de perfomance, pois seu SQL atual entrega menos desempenho em relação ao cloud.';
                 }
             }
 
             // Observações de Mapeamento Específicas de Dedicado
             //if (data.certificado === 'A3') {
-            //    rec.observacoes += '\n- Certificado Digital A3: Não são todos os certificados A3 que são compatíveis com o cloud, será necessário verificar o modelo.';
+            //    rec.observacoes += '\n Certificado Digital A3: Não são todos os certificados A3 que são compatíveis com o cloud, será necessário verificar o modelo.';
             //}
             //if (data.impressora === 'Sim') {
-            //    rec.observacoes += '\n- Impressora Matricial: Não são todos os modelos de impressora matricial que são compatíveis com o cloud, será necessário verificar o modelo.';
+            //    rec.observacoes += '\n Impressora Matricial: Não são todos os modelos de impressora matricial que são compatíveis com o cloud, será necessário verificar o modelo.';
             //}
             if (data.vpn === 'Sim') {
-                rec.observacoes += '\n- VPN: Verificar qual usuário utilizará a VPN (só é permitido 1 usuário na VPN).';
+                rec.observacoes += '\n VPN: Verificar qual usuário utilizará a VPN (só é permitido 1 usuário na VPN).';
             }
         }
 
         // Limpa a string de observações se ela começar com '\n-' ou tiver múltiplos '\n' no início
         rec.observacoes = rec.observacoes.trim();
-        if (rec.observacoes.startsWith('\n-')) {
+        if (rec.observacoes.startsWith('\n')) {
             rec.observacoes = rec.observacoes.substring(1).trim();
         }
         rec.observacoes = rec.observacoes.replace(/\n\n+/g, '\n').trim(); // Remover múltiplas quebras de linha
