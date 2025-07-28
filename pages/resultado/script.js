@@ -541,150 +541,114 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- Função para gerar o texto do relatório ---
     function generateReportText(data, recommendations) {
-        // Helper para verificar se um valor é "N/A" ou nulo/vazio
-        const isNA = (value) => {
-            return value === null || value === undefined || value === '' || (typeof value === 'string' && value.trim().toLowerCase() === 'n/a');
-        };
+    const isNA = (value) => {
+        return value === null || value === undefined || value === '' || (typeof value === 'string' && value.trim().toLowerCase() === 'n/a');
+    };
 
-        // Função para construir uma linha condicionalmente
-        const buildLine = (label, value, suffix = '') => {
-            if (!isNA(value)) {
-                return `${label}: ${value}${suffix}`; // Removido o '\n' para que o filter final cuide da quebra de linha
-            }
-            return '';
-        };
-
-        /* Função para construir a seção de Distribuição da RAM condicionalmente
-        const buildRamDistribution = (sql, win, user, bot, type) => {
-            let lines = [];
-            let sqlLine = buildLine('  SQL Server', sql);
-            let winLine = buildLine('  Windows', win);
-            let userLine = buildLine('  Usuários', user);
-            let botLine = (recommendations[type === 'Minimo' ? 'botMinimo' : 'botRecomendado'] !== null) ? `  BOT (Holos/People): ${bot}` : '';
-
-            if (sqlLine) lines.push(sqlLine);
-            if (winLine) lines.push(winLine);
-            if (userLine) lines.push(userLine);
-            if (botLine) lines.push(botLine);
-
-            if (lines.length > 0) {
-                return `Distribuição da RAM:\n${lines.join('\n')}`; // Adiciona quebra de linha entre as sub-linhas
-            }
-            return '';
-        };
-		*/
-
-
-        let reportParts = []; // Array para armazenar as partes do relatório
-        reportParts.push(`--- Relatório de Diagnóstico de Sistema e SQL ---
-Data da Coleta: ${new Date().toLocaleString()}`);
-
-		// ## Resultado do mapeamento
-        let resultMappingParts = [];
-
-        // Ambiente Minimo
-        let minLines = [
-            buildLine('Tipo de Servidor', recommendations.tipoServidor),
-            buildLine('Quantidade de vCPU', recommendations.vCPUMinimo),
-            buildRamDistribution(recommendations.sqlServerMinimo, recommendations.windowsMinimo, recommendations.usuariosMinimo, recommendations.botMinimo, 'Minimo'),
-            buildLine('Memória RAM Total', recommendations.memoriaRamTotalMinimo),
-            buildLine('Versão do SQL Server', recommendations.sqlServerVersionMinimo),
-            buildLine('Armazenamento', recommendations.armazenamento)
-        ].filter(line => line !== '');
-        if (minLines.length > 0) {
-            resultMappingParts.push(`### Ambiente Minimo:\n${minLines.join('\n')}`);
+    const buildLine = (label, value, suffix = '') => {
+        if (!isNA(value)) {
+            return `<li><strong>${label}:</strong> ${value}${suffix}</li>`;
         }
+        return '';
+    };
 
-        // Ambiente Recomendado
-        let recLines = [
-            buildLine('Tipo de Servidor', recommendations.tipoServidor),
-            buildLine('Quantidade de vCPU', recommendations.vCPURecomendado),
-            buildRamDistribution(recommendations.sqlServerRecomendado, recommendations.windowsRecomendado, recommendations.usuariosRecomendado, recommendations.botRecomendado, 'Recomendado'),
-            buildLine('Memória RAM Total', recommendations.memoriaRamTotalRecomendado),
-            buildLine('Versão do SQL Server', recommendations.sqlServerVersionRecomendado),
-            buildLine('Armazenamento', recommendations.armazenamento)
-        ].filter(line => line !== '');
-        if (recLines.length > 0) {
-            resultMappingParts.push(`### Ambiente Recomendado:\n${recLines.join('\n')}`);
-        }
-        
-        if (resultMappingParts.length > 0) {
-             reportParts.push(`## Resultado do mapeamento\n${resultMappingParts.join('\n\n')}`); // Adiciona '\n\n' entre as subseções Minimo/Recomendado
-        }
+    let reportParts = [];
 
+    reportParts.push(`<h2>Relatório de Diagnóstico de Sistema e SQL</h2><p><strong>Data da Coleta:</strong> ${new Date().toLocaleString()}</p><hr>`);
 
-        // Observações
-        if (!isNA(recommendations.observacoes)) { // Verifica se há observações para exibir
-            reportParts.push(`---
-Observações:\n${recommendations.observacoes}`);
-        } else {
-            reportParts.push(`---
-Observações:\nNenhuma observação.`); // Mantém a linha de "Nenhuma observação." se não houver
-        }
+    // ## Resultado do mapeamento
+    let resultMappingParts = [];
 
-        // ## Dados do Cliente e Empresas
-        let clientDataLines = [
-            buildLine('Informações do Cliente', data.clienteInfo),
-            buildLine('Empresas Ativas', data.empAtivas),
-            buildLine('Empresas Inativas', data.empInativas),
-            buildLine('Total de Empresas', data.empTotal),
-            buildLine('Maior Quadro de Funcionários', data.funcionariosEmpresaMaior),
-            buildLine('Total de Funcionários da Base', data.funcionariosEmpresaTotal),
-            buildLine('Média XML Mensal', data.mediaXMLmensal),
-            buildLine('Média XML Mensal(Varejista)', data.mediaXMLmensalVarejista),
-            buildLine('Maior Banco de Dados', (data.sqlMaiorBancoBaseMB / 1024).toFixed(2), ' GB'),
-            buildLine('Tamanho Total da Base', (data.sqlTotalBancoBaseMB / 1024).toFixed(2), ' GB')
-        ].filter(line => line !== '');
-        if (clientDataLines.length > 0) {
-            reportParts.push(`---
-## Dados do Cliente e Empresas\n${clientDataLines.join('\n')}`);
-        }
+    // Ambiente Minimo
+    let minLines = [
+        buildLine('Tipo de Servidor', recommendations.tipoServidor),
+        buildLine('Quantidade de vCPU', recommendations.vCPUMinimo),
+        buildLine('Memória RAM Total', recommendations.memoriaRamTotalMinimo),
+        buildLine('Versão do SQL Server', recommendations.sqlServerVersionMinimo),
+        buildLine('Armazenamento', recommendations.armazenamento)
+    ].filter(line => line !== '');
 
-        
-
-        // ## Parâmetros do Mapeamento
-        let mappingDataLines = [
-            //buildLine('Possui Impressora Matricial', data.impressora),
-            buildLine('Possui NFe Express', data.nfe),
-            buildLine('Utiliza NGPonto', data.ponto),
-            buildLine('Utiliza Holos/People', data.holos),
-            buildLine('Precisa de VPN', data.vpn),
-            //buildLine('Certificado Digital', data.certificado),
-            buildLine('Quantidade de Usuários para acesso', data.qtdUsuarios),
-            //buildLine('Número do Chamado', data.codChamado)
-        ].filter(line => line !== '');
-        if (mappingDataLines.length > 0) {
-            reportParts.push(`---
-## Parâmetros do Mapeamento\n${mappingDataLines.join('\n')}`);
-        }
-
-        
-		
-		// ## Dados do Ambiente (SO, Hardware e SQL Server)
-        let envDataLines = [
-            buildLine('Versão do Windows', data.windowsVersion),
-            buildLine('Versão do SQL Server', data.sqlVersion),
-            buildLine('Nome do Processador', data.processorName),
-            buildLine('Número de Cores/Núcleos', data.coreCount),
-            buildLine('RAM Total', (data.totalRamGB / 1024).toFixed(2), ' GB'),
-            buildLine('RAM Alocada para SQL Server', data.sqlRamDisplay),
-            buildLine('Tipo de Conexão', data.connectionType),
-            buildLine('Velocidade de Leitura de Disco', data.diskReadSpeedMBps, ' MB/s'),
-            buildLine('Velocidade de Escrita de Disco', data.diskWriteSpeedMBps, ' MB/s'),
-            buildLine('Tipo de Disco', data.diskType),
-            buildLine('Tamanho Total do Disco', (data.diskTotalGB / 1024).toFixed(2), ' GB'),
-            buildLine('Pontuação CPU Multi-core', data.cpuMultiCoreScore),
-            buildLine('Velocidade de Upload(Aproximado)', data.internetUploadSpeedMbps, ' Mbps'),
-            buildLine('Velocidade de Download(Aproximado)', data.internetDownloadSpeedMbps, ' Mbps')
-        ].filter(line => line !== '');
-        if (envDataLines.length > 0) {
-            reportParts.push(`---
-## Dados do Ambiente (SO, Hardware e SQL Server)\n${envDataLines.join('\n')}`);
-        }
-
-
-        // Junta todas as partes do relatório
-        let finalReport = reportParts.join('\n\n'); // Junta seções principais com duas quebras de linha
-        return finalReport;
+    if (minLines.length > 0) {
+        resultMappingParts.push(`<h3>Ambiente Mínimo</h3><ul>${minLines.join('')}</ul>`);
     }
+
+    // Ambiente Recomendado
+    let recLines = [
+        buildLine('Tipo de Servidor', recommendations.tipoServidor),
+        buildLine('Quantidade de vCPU', recommendations.vCPURecomendado),
+        buildLine('Memória RAM Total', recommendations.memoriaRamTotalRecomendado),
+        buildLine('Versão do SQL Server', recommendations.sqlServerVersionRecomendado),
+        buildLine('Armazenamento', recommendations.armazenamento)
+    ].filter(line => line !== '');
+
+    if (recLines.length > 0) {
+        resultMappingParts.push(`<h3>Ambiente Recomendado</h3><ul>${recLines.join('')}</ul>`);
+    }
+
+    if (resultMappingParts.length > 0) {
+        reportParts.push(`<h3>Resultado do Mapeamento</h3>${resultMappingParts.join('<br><br>')}`);
+    }
+
+    // Observações
+    reportParts.push(`<h3>Observações</h3><ul>${
+        !isNA(recommendations.observacoes)
+            ? recommendations.observacoes.split('\n').map(obs => `<li>${obs}</li>`).join('')
+            : '<li>Nenhuma observação.</li>'
+    }</ul><hr>`);
+
+    // ## Dados do Cliente e Empresas
+    let clientDataLines = [
+        buildLine('Informações do Cliente', data.clienteInfo),
+        buildLine('Empresas Ativas', data.empAtivas),
+        buildLine('Empresas Inativas', data.empInativas),
+        buildLine('Total de Empresas', data.empTotal),
+        buildLine('Maior Quadro de Funcionários', data.funcionariosEmpresaMaior),
+        buildLine('Total de Funcionários da Base', data.funcionariosEmpresaTotal),
+        buildLine('Média XML Mensal', data.mediaXMLmensal),
+        buildLine('Média XML Mensal (Varejista)', data.mediaXMLmensalVarejista),
+        buildLine('Maior Banco de Dados', (data.sqlMaiorBancoBaseMB / 1024).toFixed(2), ' GB'),
+        buildLine('Tamanho Total da Base', (data.sqlTotalBancoBaseMB / 1024).toFixed(2), ' GB')
+    ].filter(line => line !== '');
+
+    if (clientDataLines.length > 0) {
+        reportParts.push(`<h3>Dados do Cliente e Empresas</h3><ul>${clientDataLines.join('')}</ul>`);
+    }
+
+    // ## Parâmetros do Mapeamento
+    let mappingDataLines = [
+        buildLine('Possui NFe Express', data.nfe),
+        buildLine('Utiliza NGPonto', data.ponto),
+        buildLine('Utiliza Holos/People', data.holos),
+        buildLine('Precisa de VPN', data.vpn),
+        buildLine('Quantidade de Usuários para acesso', data.qtdUsuarios)
+    ].filter(line => line !== '');
+
+    if (mappingDataLines.length > 0) {
+        reportParts.push(`<h3>Parâmetros do Mapeamento</h3><ul>${mappingDataLines.join('')}</ul>`);
+    }
+
+    // ## Dados do Ambiente
+    let envDataLines = [
+        buildLine('Versão do Windows', data.windowsVersion),
+        buildLine('Versão do SQL Server', data.sqlVersion),
+        buildLine('Nome do Processador', data.processorName),
+        buildLine('Número de Cores/Núcleos', data.coreCount),
+        buildLine('RAM Total', (data.totalRamGB / 1024).toFixed(2), ' GB'),
+        buildLine('RAM Alocada para SQL Server', data.sqlRamDisplay),
+        buildLine('Tipo de Conexão', data.connectionType),
+        buildLine('Velocidade de Leitura de Disco', data.diskReadSpeedMBps, ' MB/s'),
+        buildLine('Velocidade de Escrita de Disco', data.diskWriteSpeedMBps, ' MB/s'),
+        buildLine('Tipo de Disco', data.diskType),
+        buildLine('Tamanho Total do Disco', (data.diskTotalGB / 1024).toFixed(2), ' GB'),
+        buildLine('Pontuação CPU Multi-core', data.cpuMultiCoreScore),
+        buildLine('Velocidade de Upload (Aproximado)', data.internetUploadSpeedMbps, ' Mbps'),
+        buildLine('Velocidade de Download (Aproximado)', data.internetDownloadSpeedMbps, ' Mbps')
+    ].filter(line => line !== '');
+
+    if (envDataLines.length > 0) {
+        reportParts.push(`<h3>Dados do Ambiente (SO, Hardware e SQL Server)</h3><ul>${envDataLines.join('')}</ul>`);
+    }
+
+    return reportParts.join('<br><br>');
+}
 });
