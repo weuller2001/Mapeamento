@@ -649,6 +649,6 @@ document.addEventListener('DOMContentLoaded', function() {
         reportParts.push(`<h3>Dados do Ambiente (SO, Hardware e SQL Server)</h3><ul>${envDataLines.join('')}</ul>`);
     }
 
-    return reportParts.join('<br><br>');
+    return reportParts.join('<hr>');
 }
 });
