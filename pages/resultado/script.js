@@ -297,7 +297,7 @@ document.addEventListener('DOMContentLoaded', function() {
             qtdUsuarios >= 7 || 
             //data.impressora === 'Sim' || 
             data.nfe === 'Sim' || 
-            data.vpn === 'Sim' || ) { 
+            data.vpn === 'Sim' ) { 
             //data.certificado === 'A3'
             rec.tipoServidor = 'Dedicado';
             rec.sqlServerVersionMinimo = baseRecommendedSqlServerVersion; // Usa a base recomendada
