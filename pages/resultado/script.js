@@ -159,8 +159,8 @@ document.addEventListener('DOMContentLoaded', function() {
             return ''; // Retorna string vazia para indicar que não foi selecionado
         };
 
-        const certificado = getRadioValue('certificado');
-        const impressora = getRadioValue('impressora');
+        //const certificado = getRadioValue('certificado');
+        //const impressora = getRadioValue('impressora');
         const nfe = getRadioValue('nfe');
         const ponto = getRadioValue('ponto');
         const holos = getRadioValue('holos'); // Este é o campo que será usado para a lógica do "BOT"
@@ -171,8 +171,8 @@ document.addEventListener('DOMContentLoaded', function() {
         //const codChamado = document.getElementById('codChamado')?.value.trim();
 
         return {
-            certificado,
-            impressora,
+            //certificado,
+            //impressora,
             nfe,
             ponto,
             holos, // Manter como 'holos'
@@ -188,8 +188,8 @@ document.addEventListener('DOMContentLoaded', function() {
         let missingFields = [];
 
         // Verifica radio buttons
-        if (!mappingData.certificado) missingFields.push('Certificado Digital');
-        if (!mappingData.impressora) missingFields.push('Impressora Matricial');
+        //if (!mappingData.certificado) missingFields.push('Certificado Digital');
+        //if (!mappingData.impressora) missingFields.push('Impressora Matricial');
         if (!mappingData.nfe) missingFields.push('NFe Express');
         if (!mappingData.ponto) missingFields.push('NGPonto');
         if (!mappingData.holos) missingFields.push('Holos/People');
@@ -295,10 +295,11 @@ document.addEventListener('DOMContentLoaded', function() {
             mediaXMLmensal > 7000 || 
             mediaXMLmensalVarejista > 7000 || 
             qtdUsuarios >= 7 || 
-            data.impressora === 'Sim' || 
+            //data.impressora === 'Sim' || 
             data.nfe === 'Sim' || 
             data.vpn === 'Sim' || 
-            data.certificado === 'A3') { 
+            //data.certificado === 'A3') 
+			{ 
             rec.tipoServidor = 'Dedicado';
             rec.sqlServerVersionMinimo = baseRecommendedSqlServerVersion; // Usa a base recomendada
             rec.sqlServerVersionRecomendado = baseRecommendedSqlServerVersion;
@@ -501,12 +502,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             // Observações de Mapeamento Específicas de Dedicado
-            if (data.certificado === 'A3') {
-                rec.observacoes += '\n- Certificado Digital A3: Não são todos os certificados A3 que são compatíveis com o cloud, será necessário verificar o modelo.';
-            }
-            if (data.impressora === 'Sim') {
-                rec.observacoes += '\n- Impressora Matricial: Não são todos os modelos de impressora matricial que são compatíveis com o cloud, será necessário verificar o modelo.';
-            }
+            //if (data.certificado === 'A3') {
+            //    rec.observacoes += '\n- Certificado Digital A3: Não são todos os certificados A3 que são compatíveis com o cloud, será necessário verificar o modelo.';
+            //}
+            //if (data.impressora === 'Sim') {
+            //    rec.observacoes += '\n- Impressora Matricial: Não são todos os modelos de impressora matricial que são compatíveis com o cloud, será necessário verificar o modelo.';
+            //}
             if (data.vpn === 'Sim') {
                 rec.observacoes += '\n- VPN: Verificar qual usuário utilizará a VPN (só é permitido 1 usuário na VPN).';
             }
@@ -605,13 +606,13 @@ Data da Coleta: ${new Date().toLocaleString()}`);
 
         // ## Parâmetros do Mapeamento
         let mappingDataLines = [
-            buildLine('Possui Impressora Matricial', data.impressora),
+            //buildLine('Possui Impressora Matricial', data.impressora),
             buildLine('Possui NFe Express', data.nfe),
             buildLine('Utiliza NGPonto', data.ponto),
             buildLine('Utiliza Holos/People', data.holos),
             buildLine('Precisa de VPN', data.vpn),
-            buildLine('Certificado Digital', data.certificado),
-            buildLine('Quantidade de Usuários para acesso', data.qtdUsuarios),
+            //buildLine('Certificado Digital', data.certificado),
+            buildLine('Quantidade de Usuários para acesso', data.qtdUsuarios)
             //buildLine('Número do Chamado', data.codChamado)
         ].filter(line => line !== '');
         if (mappingDataLines.length > 0) {
