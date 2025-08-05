@@ -307,8 +307,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Nova regra: se Holos/People estiver selecionado, NÃO pode ser Basico
         else if (data.holos !== 'Sim' && // Condição para impedir Basico se Holos for 'Sim'
 					sqlMaiorBancoBaseMB <= FOUR_POINT_FIVE_GB_MB && // Banco <= 4.5GB E
-                     (mediaXMLmensal === 0 || mediaXMLmensal <= 1000) && // XML Mensal baixo (0 ou <= 1000) E
-                     (mediaXMLmensalVarejista === 0 || mediaXMLmensalVarejista <= 1000) && // XML Varejista baixo (0 ou <= 1000) E
+                     (mediaXMLmensal === 0 || mediaXMLmensal <= 7000) && // XML Mensal baixo (0 ou <= 1000) E
+                     (mediaXMLmensalVarejista === 0 || mediaXMLmensalVarejista <= 7000) && // XML Varejista baixo (0 ou <= 1000) E
                      qtdUsuarios <= 3) { // Usuários <= 3
             rec.tipoServidor = 'Basico';
             rec.sqlServerVersionMinimo = 'Express'; // Basico sempre Express
@@ -317,8 +317,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // 3. Tentar Comum (se não for Dedicado nem Basico) - QUALQUER UMA destas condições
         else if ((qtdUsuarios >= 4 && qtdUsuarios <= 6) || // Usuários entre 4 e 6 OU
 					(sqlMaiorBancoBaseMB > FOUR_POINT_FIVE_GB_MB && sqlMaiorBancoBaseMB < TEN_GB_MB) || // Banco entre 4.5GB e 10GB OU
-                    (mediaXMLmensal > 1000 && mediaXMLmensal < 7000) || // XML Mensal entre 1000 e 10000 OU
-                    (mediaXMLmensalVarejista > 1000 && mediaXMLmensalVarejista < 7000)) { // XML Varejista entre 1000 e 10000
+                    (mediaXMLmensal > 7000 && mediaXMLmensal < 25000) || // XML Mensal entre 1000 e 10000 OU
+                    (mediaXMLmensalVarejista > 7000 && mediaXMLmensalVarejista < 25000)) { // XML Varejista entre 1000 e 10000
             rec.tipoServidor = 'Comum';
             rec.sqlServerVersionMinimo = 'Web'; // Comum sempre Web
             rec.sqlServerVersionRecomendado = 'Web';
