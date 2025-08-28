@@ -292,8 +292,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // 1. Tentar Dedicado (prioridade mais alta) - Qualquer uma das condições sendo verdadeira
         if (sqlMaiorBancoBaseMB > TEN_GB_MB || 
-            mediaXMLmensal > 7000 || 
-            mediaXMLmensalVarejista > 7000 || 
+            mediaXMLmensal > 25000 || 
+            mediaXMLmensalVarejista > 25000 || 
             qtdUsuarios >= 7 || 
             //data.impressora === 'Sim' || 
             data.nfe === 'Sim' || 
