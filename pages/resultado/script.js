@@ -611,7 +611,7 @@ document.addEventListener('DOMContentLoaded', function() {
         buildLine('Média XML Mensal', data.mediaXMLmensal),
         buildLine('Média XML Mensal (Varejista)', data.mediaXMLmensalVarejista),
         buildLine('Maior Banco de Dados', (data.sqlMaiorBancoBaseMB / 1024).toFixed(2), ' GB'),
-		buildLine('Nome do Maior Banco de Dados', (data.NomesqlMaiorBancoBaseMB / 1024).toFixed(2), ' GB'),
+		buildLine('Nome do Maior Banco de Dados', data.NomesqlMaiorBancoBaseMB),
         buildLine('Tamanho Total da Base', (data.sqlTotalBancoBaseMB / 1024).toFixed(2), ' GB')
     ].filter(line => line !== '');
 
