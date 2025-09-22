@@ -442,10 +442,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // --- Adicionar Observações ---
         // Observações gerais do ambiente (aplicáveis a todos os tipos de servidor)
-        if (cpuMultiCoreScore > 1000000) {
+        
+		if (cpuMultiCoreScore < 60000 || totalRamGB < 6) {
+            rec.observacoes += '\n Pode haver atraso na entrega devido a lentidão do computador do cliente.';
+		}
+		
+		if (cpuMultiCoreScore > 1000000) {
             rec.observacoes += '\n Cliente pode sentir perda de performance, pois seu processador atual possuí mais desempenho que o do cloud.';
         } else if (cpuMultiCoreScore < 1000000) {
-            rec.observacoes += '\n Cliente pode sentir ganho de performance, pois seu processador atual possuí menos desempenho que o do cloud. \n Pode haver atraso na entrega devido a lentidão do computador do cliente.';
+            rec.observacoes += '\n Cliente pode sentir ganho de performance, pois seu processador atual possuí menos desempenho que o do cloud.';
         }
 
         if (connectionType.toLowerCase() === 'wifi') {
