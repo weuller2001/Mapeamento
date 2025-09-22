@@ -445,7 +445,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (cpuMultiCoreScore > 1000000) {
             rec.observacoes += '\n Cliente pode sentir perda de performance, pois seu processador atual possuí mais desempenho que o do cloud.';
         } else if (cpuMultiCoreScore < 1000000) {
-            rec.observacoes += '\n Cliente pode sentir ganho de performance, pois seu processador atual possuí menos desempenho que o do cloud.';
+            rec.observacoes += '\n Cliente pode sentir ganho de performance, pois seu processador atual possuí menos desempenho que o do cloud. \n Pode haver atraso na entrega devido a lentidão do computador do cliente.';
         }
 
         if (connectionType.toLowerCase() === 'wifi') {
