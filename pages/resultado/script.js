@@ -20,15 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             let displayValue = value;
             let storedValue = value; // Default: armazenar como string original
-
-            // Tratar apenas campos numéricos para conversão e armazenamento como número
-            if (['sqlMaiorBancoBaseMB', 'sqlTotalBancoBaseMB', 'totalRamGB', 'diskTotalGB'].includes(paramName)) {
-                // Convertendo GB para MB para facilitar comparações numéricas
-                storedValue = (parseFloat(value.replace(',', '.')) * 1024);
-                displayValue = (storedValue / 1024).toFixed(2); // Para exibição em GB novamente
-            } else if (['diskReadSpeedMBps', 'diskWriteSpeedMBps', 'cpuMultiCoreScore', 'internetUploadSpeedMbps', 'internetDownloadSpeedMbps'].includes(paramName)) {
-                storedValue = parseFloat(value.replace(',', '.'));
-            }
+			
             // Para outros campos (texto), storedValue permanece como a string original 'value'
 
             // Atribui o valor para o elemento na página
@@ -50,28 +42,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- Preenche os campos com os dados lidos da URL ---
     fillElement('clienteInfo', 'clienteInfo');
+	fillElement('clienteCPFCNPJ', 'clienteCPFCNPJ');
     fillElement('empAtivas', 'empAtivas');
     fillElement('empInativas', 'empInativas');
     fillElement('empTotal', 'empTotal');
+	fillElement('empLucroPresumido', 'empLucroPresumido');
+	fillElement('empLucroReal', 'empLucroReal');
     fillElement('funcionariosEmpresaMaior', 'funcionariosEmpresaMaior');
     fillElement('funcionariosEmpresaTotal', 'funcionariosEmpresaTotal');
     fillElement('mediaXMLmensal', 'mediaXMLmensal');
-    fillElement('mediaXMLmensalVarejista', 'mediaXMLmensalVarejista');
     fillElement('sqlMaiorBancoBaseMB', 'sqlMaiorBancoBaseMB', ' GB'); // Agora armazena em MB, mas exibe em GB
 	fillElement('NomesqlMaiorBancoBaseMB', 'NomesqlMaiorBancoBaseMB');
     fillElement('sqlTotalBancoBaseMB', 'sqlTotalBancoBaseMB', ' ' + 'GB'); // Agora armazena em MB, mas exibe em GB
     fillElement('windowsVersion', 'windowsVersion');
-    fillElement('sqlVersion', 'sqlVersion');
-    fillElement('processorName', 'processorName');
-    fillElement('coreCount', 'coreCount');
-    fillElement('totalRamGB', 'totalRamGB', ' GB'); // Agora armazena em MB, mas exibe em GB
-    fillElement('sqlRamDisplay', 'sqlRamDisplay');
     fillElement('connectionType', 'connectionType');
-    fillElement('diskReadSpeedMBps', 'diskReadSpeedMBps', ' MB/s');
-    fillElement('diskWriteSpeedMBps', 'diskWriteSpeedMBps', ' MB/s');
-    fillElement('diskType', 'diskType');
-    fillElement('diskTotalGB', 'diskTotalGB', ' GB'); // Agora armazena em MB, mas exibe em GB
-    fillElement('cpuMultiCoreScore', 'cpuMultiCoreScore');
     fillElement('internetUploadSpeedMbps', 'internetUploadSpeedMbps', ' Mbps');
     fillElement('internetDownloadSpeedMbps', 'internetDownloadSpeedMbps', ' Mbps');
 
@@ -229,392 +213,265 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 	*/
 
-    // Helper para extrair o ano e a edição do SQL Server
-    function parseSqlServerVersion(sqlVersionString) {
-        const yearMatch = sqlVersionString.match(/SQL Server (\d{4})/);
-        const editionMatch = sqlVersionString.match(/(Express|Standard|Enterprise|Web) Edition/i);
-        const edition = editionMatch ? editionMatch[1] : 'Unknown';
-        const year = yearMatch ? parseInt(yearMatch[1], 10) : 0; // 0 se não encontrar o ano
-        return { year, edition };
-    }
-
-    // --- Nova função para calcular as recomendações ---
+    // --- calculateRecommendations MODIFICADA com Lógica de Dimensionamento Dedicado ---
     function calculateRecommendations(data) {
-        const rec = {
-            tipoServidor: 'N/A',
-            vCPUMinimo: 'N/A',
-            vCPURecomendado: 'N/A',
-            sqlServerMinimo: 'N/A',
-            sqlServerRecomendado: 'N/A',
-            windowsMinimo: '4096 MB', 
-            windowsRecomendado: '4096 MB', 
-            usuariosMinimo: 'N/A',
-            usuariosRecomendado: 'N/A',
-            botMinimo: 'N/A', 
-            botRecomendado: 'N/A', 
-            memoriaRamTotalMinimo: 'N/A',
-            memoriaRamTotalRecomendado: 'N/A',
-            sqlServerVersionMinimo: 'N/A', // Será definido abaixo
-            sqlServerVersionRecomendado: 'N/A', // Será definido abaixo
-            armazenamento: '140 GB', // Valor padrão para Dedicado
-            observacoes: '' // Inicializa observações como string vazia
-        };
+        // --- Definição dos Pacotes ---
+        const PACKAGES = [
+            // ... [Definição dos pacotes NG Essence I - X (Não alterado)] ...
+            { name: 'NGEssence Start', users: 2, totalCompanies: 10, presumptiveProfit: 2, actualProfit: 0, maxEmployeesPerCompany: 20, totalEmployees: 100, isFly: false, sql: 'Express' },
+            { name: 'NG Essence I', users: 2, totalCompanies: 20, presumptiveProfit: 10, actualProfit: 0, maxEmployeesPerCompany: 25, totalEmployees: 150, isFly: false, sql: 'Express' },
+            { name: 'NG Essence II', users: 2, totalCompanies: 30, presumptiveProfit: 30, actualProfit: 0, maxEmployeesPerCompany: 30, totalEmployees: 250, isFly: false, sql: 'Express' },
+            { name: 'NG Essence III', users: 3, totalCompanies: 40, presumptiveProfit: 40, actualProfit: 1, maxEmployeesPerCompany: 60, totalEmployees: 300, isFly: false, sql: 'Express' },
+            { name: 'NG Essence IV', users: 3, totalCompanies: 50, presumptiveProfit: 50, actualProfit: 1, maxEmployeesPerCompany: 60, totalEmployees: 350, isFly: false, sql: 'Express' },
+            { name: 'NG Essence V', users: 4, totalCompanies: 60, presumptiveProfit: 60, actualProfit: 1, maxEmployeesPerCompany: 60, totalEmployees: 400, isFly: false, sql: 'Express' },
+            { name: 'NG Essence VI', users: 4, totalCompanies: 70, presumptiveProfit: 70, actualProfit: 1, maxEmployeesPerCompany: 60, totalEmployees: 500, isFly: false, sql: 'Express' },
+            { name: 'NG Essence VII', users: 4, totalCompanies: 80, presumptiveProfit: 80, actualProfit: 2, maxEmployeesPerCompany: 60, totalEmployees: 500, isFly: false, sql: 'Express' },
+            { name: 'NG Essence VIII', users: 5, totalCompanies: 80, presumptiveProfit: 80, actualProfit: 3, maxEmployeesPerCompany: 60, totalEmployees: 600, isFly: false, sql: 'Express' },
+            { name: 'NG Essence IX', users: 6, totalCompanies: 90, presumptiveProfit: 90, actualProfit: 4, maxEmployeesPerCompany: 65, totalEmployees: 700, isFly: false, sql: 'Express' },
+            { name: 'NG Essence X', users: 6, totalCompanies: 100, presumptiveProfit: 100, actualProfit: 5, maxEmployeesPerCompany: 70, totalEmployees: 800, isFly: false, sql: 'Express' },
+            // Pacotes Fly (Dedicados)
+            { name: 'NG Essence Fly I (Dedicado)', users: 6, totalCompanies: 100, presumptiveProfit: 100, actualProfit: 100, maxEmployeesPerCompany: 60, totalEmployees: 1000, isFly: true, sql: 'Web' },
+            { name: 'NG Essence Fly II (Dedicado)', users: 6, totalCompanies: 125, presumptiveProfit: 125, actualProfit: 125, maxEmployeesPerCompany: 70, totalEmployees: 1500, isFly: true, sql: 'Web' },
+            { name: 'NG Essence Fly III (Dedicado)', users: 7, totalCompanies: 150, presumptiveProfit: 150, actualProfit: 150, maxEmployeesPerCompany: 80, totalEmployees: 2000, isFly: true, sql: 'Web' },
+            { name: 'NG Essence Fly IV (Dedicado)', users: 9, totalCompanies: 200, presumptiveProfit: 200, actualProfit: 200, maxEmployeesPerCompany: 100, totalEmployees: 3000, isFly: true, sql: 'Web' },
+        ];
 
-        // Parse de valores numéricos, garantindo que sejam números
+        // --- Variáveis de Entrada do Cliente ---
+        const qtdUsuarios = parseInt(data.qtdUsuarios) || 0;
+        const totalEmpresas = parseInt(data.empTotal) || 0;
+        const empLucroPresumido = parseInt(data.empLucroPresumido) || 0;
+        const empLucroReal = parseInt(data.empLucroReal) || 0;
+        const maiorQuadroFuncionarios = parseInt(data.funcionariosEmpresaMaior) || 0;
+        const totalFuncionarios = parseInt(data.funcionariosEmpresaTotal) || 0;
+        
+        // Dados adicionais para dimensionamento e observações
         const sqlMaiorBancoBaseMB = parseFloat(data.sqlMaiorBancoBaseMB) || 0;
         const mediaXMLmensal = parseFloat(data.mediaXMLmensal) || 0;
-        const mediaXMLmensalVarejista = parseFloat(data.mediaXMLmensalVarejista) || 0;
-        const qtdUsuarios = parseInt(data.qtdUsuarios) || 0;
-        const totalRamGB = parseFloat(data.totalRamGB) || 0; // RAM do cliente em MB
-        const cpuMultiCoreScore = parseFloat(data.cpuMultiCoreScore) || 0;
+        const connectionType = (data.connectionType || '').toLowerCase();
         const internetDownloadSpeedMbps = parseFloat(data.internetDownloadSpeedMbps) || 0;
-        const diskReadSpeedMBps = parseFloat(data.diskReadSpeedMBps) || 0;
-        const diskWriteSpeedMBps = parseFloat(data.diskWriteSpeedMBps) || 0;
-        const connectionType = data.connectionType || '';
-        const sqlVersionClient = data.sqlVersion || ''; // Versão do SQL do cliente (string completa)
-
-        const { year: sqlClientYear, edition: sqlClientEdition } = parseSqlServerVersion(sqlVersionClient);
-
-
-        // Limites em MB para comparações
+        const HolosSelected = data.holos === 'Sim';
+        const NFeSelected = data.nfe === 'Sim';
+        const PontoSelected = data.ponto === 'Sim';
+        const VpnSelected = data.vpn === 'Sim';
+        
         const TEN_GB_MB = 10 * 1024; // 10 GB em MB = 10240 MB
-        const FOUR_POINT_FIVE_GB_MB = 4.5 * 1024; // 4.5 GB em MB = 4608 MB
-        const SEVEN_POINT_ONE_SIX_EIGHT_GB_MB = 7.168 * 1024; // 7168 MB = 7.00 GB
 
-        // Determine a versão recomendada do SQL Server com base no tamanho do banco
-        // Esta é a versão *potencial* para qualquer ambiente, antes de ajustar por tipo
-        let baseRecommendedSqlServerVersion = 'Express'; 
-        if (sqlMaiorBancoBaseMB > SEVEN_POINT_ONE_SIX_EIGHT_GB_MB) { 
-            baseRecommendedSqlServerVersion = 'Web';
-        }
-
-
-        // --- Determinação do Tipo de Servidor (com nova hierarquia: Dedicado -> Basico -> Comum) ---
-
-        // 1. Tentar Dedicado (prioridade mais alta) - Qualquer uma das condições sendo verdadeira
-        if (sqlMaiorBancoBaseMB > TEN_GB_MB || 
-            mediaXMLmensal > 25000 || 
-            mediaXMLmensalVarejista > 25000 || 
-            qtdUsuarios >= 7 || 
-            //data.impressora === 'Sim' || 
-            data.nfe === 'Sim' || 
-            data.vpn === 'Sim' ) { 
-            //data.certificado === 'A3'
-            rec.tipoServidor = 'Dedicado';
-            rec.sqlServerVersionMinimo = baseRecommendedSqlServerVersion; // Usa a base recomendada
-            rec.sqlServerVersionRecomendado = baseRecommendedSqlServerVersion;
-        }
-        // 2. Tentar Basico (se não for Dedicado) - TODAS as condições devem ser VERDADEIRAS
-        // Nova regra: se Holos/People estiver selecionado, NÃO pode ser Basico
-        else if (data.holos !== 'Sim' && // Condição para impedir Basico se Holos for 'Sim'
-					sqlMaiorBancoBaseMB <= FOUR_POINT_FIVE_GB_MB && // Banco <= 4.5GB E
-                     (mediaXMLmensal === 0 || mediaXMLmensal <= 7000) && // XML Mensal baixo (0 ou <= 1000) E
-                     (mediaXMLmensalVarejista === 0 || mediaXMLmensalVarejista <= 7000) && // XML Varejista baixo (0 ou <= 1000) E
-                     qtdUsuarios <= 3) { // Usuários <= 3
-            rec.tipoServidor = 'Basico';
-            rec.sqlServerVersionMinimo = 'Express'; // Basico sempre Express
-            rec.sqlServerVersionRecomendado = 'Express';
-        }
-        // 3. Tentar Comum (se não for Dedicado nem Basico) - QUALQUER UMA destas condições
-        else if ((qtdUsuarios >= 4 && qtdUsuarios <= 6) || // Usuários entre 4 e 6 OU
-					(sqlMaiorBancoBaseMB > FOUR_POINT_FIVE_GB_MB && sqlMaiorBancoBaseMB < TEN_GB_MB) || // Banco entre 4.5GB e 10GB OU
-                    (mediaXMLmensal > 7000 && mediaXMLmensal < 25000) || // XML Mensal entre 1000 e 10000 OU
-                    (mediaXMLmensalVarejista > 7000 && mediaXMLmensalVarejista < 25000)) { // XML Varejista entre 1000 e 10000
-            rec.tipoServidor = 'Comum';
-            rec.sqlServerVersionMinimo = 'Web'; // Comum sempre Web
-            rec.sqlServerVersionRecomendado = 'Web';
-        } else {
-            rec.tipoServidor = 'Não classificado';
-            rec.observacoes += 'Não foi possível classificar o tipo de servidor com as regras fornecidas.';
-            rec.sqlServerVersionMinimo = 'N/A'; // Se não classificado, SQL também é N/A
-            rec.sqlServerVersionRecomendado = 'N/A';
-        }
-
-
-        // --- Cálculos Condicionais ---
-        let sqlMin = 0;
-        let sqlRec = 0;
-        let usuariosMin = 0;
-        let usuariosRec = 0;
-        let holosBotMin = 0; 
-        let holosBotRec = 0; 
-        const windowsMinVal = 4096; 
-        const windowsRecVal = 4096; 
-		
-		// Função auxiliar para arredondar MB para o próximo GB par
-		function roundUpToNextEvenGB(mbValue) {
-			if (mbValue === 0 || isNaN(mbValue)) return '0 GB'; // Garante "0 GB" para valores nulos/zero
-			const gbValue = mbValue / 1024; // Converte MB para GB
-			let roundedGb = Math.ceil(gbValue); // Arredonda para o próximo inteiro
-			if (roundedGb % 2 !== 0) { // Se for ímpar, adicione 1 para tornar par
-				roundedGb += 1;
-			}
-			return `${roundedGb} GB`;
-}
-
-        // Definir armazenamento padrão de 2GB para não-Dedicado
-        if (rec.tipoServidor !== 'Dedicado') {
-            rec.armazenamento = '2 GB';
-        }
-
-
-        if (rec.tipoServidor === 'Dedicado') {
-			const MIN_DEDICADO_VCPU = 2; // Mínimo de 2 vCPUs para Dedicado
-            const MIN_DEDICADO_RAM_MB = 8 * 1024;
-			
-			rec.vCPUMinimo = Math.ceil(qtdUsuarios / 2); 
-			rec.vCPURecomendado = Math.ceil(qtdUsuarios / 1.5);
-			
-			 // Ajustar vCPU Mínimo se for menor que o mínimo obrigatório
-            if (rec.vCPUMinimo < MIN_DEDICADO_VCPU) {
-                rec.vCPUMinimo = MIN_DEDICADO_VCPU;
-            }
-
-			// Lógica de cálculo de SQL Server RAM baseada na versão e qtdUsuarios
-			if (rec.sqlServerVersionRecomendado === 'Express') { // Usa a versão já definida para o tipo
-				sqlMin = 3072 / 1024; // 3GB para Express
-				sqlRec = 3072 / 1024;
-			} else { // Versão é 'Web'
-				if (qtdUsuarios > 6) {
-					sqlMin = 3584 + ((qtdUsuarios - 6) * 512) / 1024;
-					sqlRec = 3584 + ((qtdUsuarios - 6) * 896) / 1024;
-				} else {
-					sqlMin = 3584 / 1024;
-					sqlRec = 3584 / 1024; // Corrigido aqui, estava 'rec = 3584' deveria ser 'sqlRec = 3584'
-				}
-			}
-			
-			rec.sqlServerMinimo = `${sqlMin} GB`;
-			rec.sqlServerRecomendado = `${sqlRec} GB`;
-
-
-			usuariosMin = qtdUsuarios * 896;
-			usuariosRec = qtdUsuarios * 1280;
-			rec.usuariosMinimo = `${usuariosMin} MB`;
-			rec.usuariosRecomendado = `${usuariosRec} MB`;
-
-			// Lógica para "BOT" baseada em Holos/People
-			if (data.holos === 'Sim') { 
-				holosBotMin = 2048;
-				holosBotRec = 2048;
-				rec.botMinimo = `${holosBotMin} MB`;
-				rec.botRecomendado = `${holosBotRec} MB`;
-			} else {
-				rec.botMinimo = null; 
-				rec.botRecomendado = null;
-			}
-
-            // Memória RAM Total (usando os valores numéricos)
-            const currentHolosBotMin = (data.holos === 'Sim' ? holosBotMin : 0);
-            const currentHolosBotRec = (data.holos === 'Sim' ? holosBotRec : 0);
-
-            const totalRamMinMB = sqlMin + windowsMinVal + usuariosMin + currentHolosBotMin;
-			const totalRamRecMB = sqlRec + windowsRecVal + usuariosRec + currentHolosBotRec;
-			
-			// Ajustar RAM Total Mínima se for menor que o mínimo obrigatório
-            let finalTotalRamMinMB = totalRamMinMB;
-            if (totalRamMinMB < MIN_DEDICADO_RAM_MB) {
-                finalTotalRamMinMB = MIN_DEDICADO_RAM_MB;
-            }
-
-			// Aplica a nova função de arredondamento para a RAM Total
-			rec.memoriaRamTotalMinimo = roundUpToNextEvenGB(totalRamMinMB);
-			rec.memoriaRamTotalRecomendado = roundUpToNextEvenGB(totalRamRecMB);
-
-		} else if (rec.tipoServidor === 'Comum' || rec.tipoServidor === 'Basico') {
-			// Para Comum e Basico, vamos definir os valores de RAM e vCPU como 'N/A'
-			// já que você só pediu cálculos específicos para 'Dedicado'.
-			rec.vCPUMinimo = 'N/A';
-			rec.vCPURecomendado = 'N/A';
-			rec.sqlServerMinimo = 'N/A';
-			rec.sqlServerRecomendado = 'N/A';
-			rec.usuariosMinimo = 'N/A';
-			rec.usuariosRecomendado = 'N/A';
-			rec.botMinimo = null; 
-			rec.botRecomendado = null; 
-			rec.memoriaRamTotalMinimo = 'N/A';
-			rec.memoriaRamTotalRecomendado = 'N/A';
-			rec.windowsMinimo = 'N/A'; 
-			rec.windowsRecomendado = 'N/A'; 
-		}
-        // Se for "Não classificado", os valores já estão como 'N/A' (ou null para BOT) no início do rec,
-        // então não precisamos de um 'else' adicional aqui.
-
-        // --- Adicionar Observações ---
-        // Observações gerais do ambiente (aplicáveis a todos os tipos de servidor)
+        let recommendedPackage = 'N/A';
+        let recommendationDetails = null;
+        let reasonsForUpgrade = [];
         
-		if (cpuMultiCoreScore < 60000 || totalRamGB < 6) {
-            rec.observacoes += '\n Pode haver atraso na entrega devido a lentidão do computador do cliente.';
-		}
-		
-		if (cpuMultiCoreScore > 1000000) {
-            rec.observacoes += '\n Cliente pode sentir perda de performance, pois seu processador atual possuí mais desempenho que o do cloud.';
-        } else if (cpuMultiCoreScore < 1000000) {
-            rec.observacoes += '\n Cliente pode sentir ganho de performance, pois seu processador atual possuí menos desempenho que o do cloud.';
-        }
+        // --- Lógica de Classificação de Pacote (Não alterada) ---
+        for (const pkg of PACKAGES) {
+            const meetsUsers = qtdUsuarios <= pkg.users;
+            const meetsTotalCompanies = totalEmpresas <= pkg.totalCompanies;
+            const meetsPresumptive = empLucroPresumido <= pkg.presumptiveProfit;
+            const meetsActual = empLucroReal <= pkg.actualProfit;
+            const meetsMaxEmployees = maiorQuadroFuncionarios <= pkg.maxEmployeesPerCompany;
+            const meetsTotalEmployees = totalFuncionarios <= pkg.totalEmployees;
 
-        if (connectionType.toLowerCase() === 'wifi') {
-            rec.observacoes += '\n Cliente pode ter instabilidades no acesso por utilizar a conexão Wifi, indica-lo a usar sempre conexão cabeada.';
-        }
-
-        if (internetDownloadSpeedMbps < 15) {
-            rec.observacoes += '\n Cliente pode ter instabilidades no acesso por sua internet ser lenta.';
-        }
-
-        if (diskReadSpeedMBps < 5500 && diskWriteSpeedMBps < 2700) {
-            rec.observacoes += '\n Cliente pode sentir ganho de performance, pois seu disco atual é lento em comparação ao do cloud.';
-        } else if (diskReadSpeedMBps > 5500 && diskWriteSpeedMBps > 2700) {
-            rec.observacoes += '\n Cliente pode sentir perda de performance, pois seu disco atual é rápido em comparação ao do cloud.';
-        }
-
-        // Ponto deve adicionar observação independente da classificação para Dedicado
-        if (data.ponto === 'Sim') {
-            rec.observacoes += '\n NGPonto: Importações de ponto do relógio serão feitas manualmente, pois com o sistema em nuvem não é possível coletar automaticamente.';
+            if (meetsUsers && meetsTotalCompanies && meetsPresumptive && meetsActual && meetsMaxEmployees && meetsTotalEmployees) {
+                recommendedPackage = pkg.name;
+                recommendationDetails = pkg;
+                break;
+            }
         }
         
-        // Observações específicas por Tipo de Servidor
-        if (rec.tipoServidor === 'Basico') {
-            if (totalRamGB > 8 * 1024) { // 8GB em MB
-                rec.observacoes += '\n Memória: Cliente pode sentir perda de performance, pois sua memória atual possuí mais capacidade que a do cloud.';
-            } else if (totalRamGB < 8 * 1024) {
-                rec.observacoes += '\n Memória: Cliente pode sentir ganho de performance, pois sua memória atual possuí menos capacidade que a do cloud.';
-            }
-            if (sqlClientYear !== 0 && sqlClientYear < 2022) {
-                rec.observacoes += '\n SQL Server: Cliente pode sentir ganho de performance, pois seu SQL atual está desatualizado.';
-            }
-            if (sqlClientEdition.toLowerCase() !== 'express' && sqlClientEdition.toLowerCase() !== 'unknown') {
-                rec.observacoes += '\n SQL Server: Cliente pode sentir perda de perfomance, pois seu SQL atual é entrega mais desempenho.';
-            }
-
-
-        } else if (rec.tipoServidor === 'Comum') {
-            if (totalRamGB > 16 * 1024) { // 16GB em MB
-                rec.observacoes += '\n Memória: Cliente pode sentir perda de performance, pois sua memória atual possuí mais capacidade que a do cloud.';
-            } else if (totalRamGB < 16 * 1024) {
-                rec.observacoes += '\n Memória: Cliente pode sentir ganho de performance, pois sua memória atual possuí menos capacidade que a do cloud.';
-            }
-            // Nova regra: Comum sempre usa SQL Web. Comentário se cliente usa Express
-            if (sqlClientEdition.toLowerCase() === 'express') {
-                rec.observacoes += '\n SQL Server: Cliente pode sentir ganho de perfomance, pois seu SQL atual entrega menos desempenho em relação ao cloud.';
-            }
-
-
-        } else if (rec.tipoServidor === 'Dedicado') {
-            // Observações de Memória para Dedicado
-            const sqlServerMinimoVal = parseFloat(rec.sqlServerMinimo.replace(' MB', '')) || 0;
-            if (totalRamGB < sqlServerMinimoVal) {
-                rec.observacoes += '\n Memória: Cliente pode sentir ganho de performance, pois sua memória atual possuí menos capacidade que a do cloud (Mínimo para operação do ambiente).';
-            }
-            
-            // Observações de SQL Server para Dedicado
-            if (rec.sqlServerVersionRecomendado === 'Express') { // Usa a versão definida para Dedicado
-                if (sqlClientYear !== 0 && sqlClientYear < 2022) {
-                    rec.observacoes += '\n SQL Server: Cliente pode sentir ganho de perfomance, pois seu SQL atual está desatualizado.';
-                }
-                if (sqlClientEdition.toLowerCase() !== 'express' && sqlClientEdition.toLowerCase() !== 'unknown') { // se for Standard, Enterprise, etc.
-                    rec.observacoes += '\n SQL Server: Cliente pode sentir perda de perfomance, pois seu SQL atual é entrega mais desempenho (pode ser ofertado o Dedicado com SQL Web para ter mais desempenho).';
-                }
-            } else if (rec.sqlServerVersionRecomendado === 'Web') { // Dedicado com SQL Web
-                if (sqlClientEdition.toLowerCase() === 'express') {
-                    rec.observacoes += '\n SQL Server: Cliente pode sentir ganho de perfomance, pois seu SQL atual entrega menos desempenho em relação ao cloud.';
-                }
-            }
-
-            // Observações de Mapeamento Específicas de Dedicado
-            //if (data.certificado === 'A3') {
-            //    rec.observacoes += '\n Certificado Digital A3: Não são todos os certificados A3 que são compatíveis com o cloud, será necessário verificar o modelo.';
-            //}
-            //if (data.impressora === 'Sim') {
-            //    rec.observacoes += '\n Impressora Matricial: Não são todos os modelos de impressora matricial que são compatíveis com o cloud, será necessário verificar o modelo.';
-            //}
-            if (data.vpn === 'Sim') {
-                rec.observacoes += '\n VPN: Verificar qual usuário utilizará a VPN (só é permitido 1 usuário na VPN).';
-            }
+        // --- Verificação e Ajuste para Dedicado (Fly) ---
+        // Se houver necessidade Dedicada por funcionalidade/volume, garantir que o pacote seja Fly.
+        if (sqlMaiorBancoBaseMB > TEN_GB_MB) {
+             reasonsForUpgrade.push('Banco de Dados: Maior banco de dados excede 10 GB.');
         }
-
-        // Limpa a string de observações se ela começar com '\n-' ou tiver múltiplos '\n' no início
-        rec.observacoes = rec.observacoes.trim();
-        if (rec.observacoes.startsWith('\n')) {
-            rec.observacoes = rec.observacoes.substring(1).trim();
+        if (mediaXMLmensal > 25000) {
+             reasonsForUpgrade.push('Volume XML: Média mensal de XML excede 25.000.');
         }
-        rec.observacoes = rec.observacoes.replace(/\n\n+/g, '\n').trim(); // Remover múltiplas quebras de linha
+        if (qtdUsuarios > 6 && !recommendedPackage.includes('Fly')) { 
+             reasonsForUpgrade.push('Usuários: Quantidade de usuários é superior a 6 (Exige Fly).');
+        }
+        if (NFeSelected) {
+             reasonsForUpgrade.push('Funcionalidade: Utiliza NFe Express.');
+        }
+        if (VpnSelected) {
+             reasonsForUpgrade.push('Funcionalidade: Requer VPN para acesso.');
+        }
+        
+        let isForcedDedicated = false;
 
-        return rec;
+        if (reasonsForUpgrade.length > 0) {
+             // Força o upgrade para Fly I se o pacote recomendado atual não for Dedicado
+             if (!recommendationDetails || !recommendationDetails.isFly) {
+                 const flyIPackage = PACKAGES.find(p => p.name.includes('Fly I'));
+                 if (flyIPackage) {
+                     recommendedPackage = 'NG Essence Fly I (Dedicado) - **SUGERIDO**';
+                     recommendationDetails = flyIPackage;
+                     isForcedDedicated = true;
+                 }
+             }
+        }
+        
+        // --- CÁLCULOS DE DIMENSIONAMENTO (APENAS SE FOR DEDICADO) ---
+        
+        let serverSpecs = {
+            vCPUMinimo: 'N/A',
+            vCPURecomendado: 'N/A',
+            memoriaRamTotalMinimo: 'N/A',
+            memoriaRamTotalRecomendado: 'N/A',
+            sqlServerVersionMinimo: recommendationDetails ? recommendationDetails.sql : 'N/A',
+            sqlServerVersionRecomendado: recommendationDetails ? recommendationDetails.sql : 'N/A',
+            armazenamento: '2 GB', // Padrão
+        };
+        
+        if (recommendationDetails && recommendationDetails.isFly || isForcedDedicated) {
+             const MIN_DEDICADO_VCPU = 3;
+             const MIN_DEDICADO_RAM_MB = 8 * 1024;
+             
+             // 1. vCPU (Baseado em Usuários)
+             serverSpecs.vCPUMinimo = Math.ceil(qtdUsuarios / 2);
+             serverSpecs.vCPURecomendado = Math.ceil(qtdUsuarios / 1.5);
+
+             if (serverSpecs.vCPUMinimo < MIN_DEDICADO_VCPU) {
+                 serverSpecs.vCPUMinimo = MIN_DEDICADO_VCPU;
+             }
+             
+             // 2. RAM SQL Server (em MB)
+             let sqlMinMB = 0;
+             let sqlRecMB = 0;
+             
+             if (recommendationDetails.sql === 'Express') { // Mínimo para Express (apenas como fallback, pois Fly é Web)
+                 sqlMinMB = 3 * 1024;
+                 sqlRecMB = 3 * 1024;
+             } else { // Versão é 'Web'
+                 // Usando a lógica original para Dedicado/Web
+                 if (qtdUsuarios > 6) {
+                     sqlMinMB = 3584 + ((qtdUsuarios - 6) * 512); // Base + 512MB por usuário extra
+                     sqlRecMB = 3584 + ((qtdUsuarios - 6) * 896); // Base + 896MB por usuário extra
+                 } else {
+                     sqlMinMB = 3584; // 3.5 GB
+                     sqlRecMB = 3584;
+                 }
+             }
+
+             // 3. RAM por Usuário (em MB)
+             const windowsMinVal = 4096;
+             const windowsRecVal = 4096;
+             const usuariosMinMB = qtdUsuarios * 896;
+             const usuariosRecMB = qtdUsuarios * 1280;
+             
+             // 4. RAM Holos/BOT (em MB)
+             const holosBotMinMB = HolosSelected ? 2048 : 0;
+             const holosBotRecMB = HolosSelected ? 2048 : 0;
+             
+             // 5. RAM Total (em MB)
+             const totalRamMinMB = sqlMinMB + windowsMinVal + usuariosMinMB + holosBotMinMB;
+             const totalRamRecMB = sqlRecMB + windowsRecVal + usuariosRecMB + holosBotRecMB;
+
+             // 6. RAM Total Final (Convertido e Arredondado)
+             let finalTotalRamMinMB = totalRamMinMB;
+             if (totalRamMinMB < MIN_DEDICADO_RAM_MB) {
+                 finalTotalRamMinMB = MIN_DEDICADO_RAM_MB;
+             }
+             
+             serverSpecs.memoriaRamTotalMinimo = roundUpToNextEvenGB(finalTotalRamMinMB);
+             serverSpecs.memoriaRamTotalRecomendado = roundUpToNextEvenGB(totalRamRecMB);
+             serverSpecs.armazenamento = '140 GB'; // Padrão Dedicado
+        }
+        
+        // --- Observações Finais (Não alteradas) ---
+        let observacoes = [];
+        if (reasonsForUpgrade.length > 0) {
+            observacoes.push('--- RECOMENDAÇÃO DEDICADO ---');
+            observacoes.push('O ambiente apresenta requisitos que indicam a necessidade de um servidor **Dedicado (Pacote Fly)**, devido a uma ou mais das seguintes razões:');
+            reasonsForUpgrade.forEach(r => observacoes.push(`- ${r}`));
+            observacoes.push('O servidor Dedicado garante maior estabilidade e recursos para estas demandas.');
+            observacoes.push('-----------------------------');
+        }
+        if (connectionType === 'wifi') observacoes.push('Cliente pode ter instabilidades no acesso por utilizar a conexão **Wifi**. Sugerir sempre conexão cabeada.');
+        if (internetDownloadSpeedMbps > 0 && internetDownloadSpeedMbps < 15) observacoes.push('Cliente pode ter instabilidades no acesso por sua internet ser lenta (< 15 Mbps de download).');
+        if (PontoSelected) observacoes.push('NGPonto: Importações de ponto do relógio serão feitas **manualmente**, pois com o sistema em nuvem não é possível coletar automaticamente.');
+        if (VpnSelected) observacoes.push('VPN: Verificar qual usuário utilizará a VPN (só é permitido 1 usuário na VPN).');
+        if (HolosSelected) observacoes.push('Holos/People: A utilização requer que a estação de trabalho atenda aos requisitos mínimos de RAM e Processamento para o "BOT".');
+
+        return {
+            recommendedPackage: recommendedPackage,
+            packageDetails: recommendationDetails, 
+            serverSpecs: serverSpecs, // Novo campo com os cálculos
+            isDedicated: recommendationDetails && recommendationDetails.isFly || isForcedDedicated, // Novo campo de flag
+            observacoes: observacoes.join('\n')
+        };
     }
 
-    // Opcional: Limpar a URL (comentado por padrão)
-    // history.replaceState({}, document.title, window.location.pathname);
-
-    // --- Função para gerar o texto do relatório ---
+    // --- Função para gerar o texto do relatório (MODIFICADA para exibição condicional) ---
     function generateReportText(data, recommendations) {
-    const isNA = (value) => {
-        return value === null || value === undefined || value === '' || 
-            (typeof value === 'string' && value.trim().toLowerCase() === 'n/a');
-    };
+        const isNA = (value) => {
+            return value === null || value === undefined || value === '' || (typeof value === 'string' && value.trim().toLowerCase() === 'n/a');
+        };
 
-    const buildLine = (label, value, suffix = '') => {
-        if (!isNA(value)) {
-            return `<li><strong>${label}:</strong> ${value}${suffix}</li>`;
+        const buildLine = (label, value, suffix = '') => {
+            if (!isNA(value)) {
+                return `<li><strong>${label}:</strong> ${value}${suffix}</li>`;
+            }
+            return '';
+        };
+
+        let reportParts = [];
+        const rec = recommendations;
+
+        reportParts.push(`<h5>Relatório de Diagnóstico de Sistema e Pacote Recomendado</h5>`);
+
+        // ## Resultado do Mapeamento (Pacote)
+        let packageLines = [
+            buildLine('Pacote Recomendado', rec.recommendedPackage),
+            buildLine('Versão SQL Server (Pacote)', rec.packageDetails ? rec.packageDetails.sql : 'N/A')
+        ].filter(line => line !== '');
+        
+        // Adicionar detalhes do pacote, se disponíveis
+        if (rec.packageDetails) {
+            packageLines.push(`<li><strong>Limite de Usuários:</strong> ${rec.packageDetails.users}</li>`);
+            packageLines.push(`<li><strong>Limite Total de Empresas:</strong> ${rec.packageDetails.totalCompanies}</li>`);
+            packageLines.push(`<li><strong>Limite Máx. Lucro Presumido:</strong> ${rec.packageDetails.presumptiveProfit}</li>`);
+            packageLines.push(`<li><strong>Limite Máx. Lucro Real:</strong> ${rec.packageDetails.actualProfit}</li>`);
+            packageLines.push(`<li><strong>Limite Máx. Funcionários por Empresa:</strong> ${rec.packageDetails.maxEmployeesPerCompany}</li>`);
+            packageLines.push(`<li><strong>Limite Total de Funcionários:</strong> ${rec.packageDetails.totalEmployees}</li>`);
         }
-        return '';
-    };
 
-    let reportParts = [];
-
-    reportParts.push(`<h5>Relatório de Diagnóstico de Sistema e SQL</h5>`);
-
-    // ## Resultado do Mapeamento
-    let resultMappingParts = [];
-
-    // Ambiente Mínimo
-    let minLines = [
-        buildLine('Tipo de Servidor', recommendations.tipoServidor),
-        buildLine('Quantidade de vCPU', recommendations.vCPUMinimo),
-        buildLine('Memória RAM Total', recommendations.memoriaRamTotalMinimo),
-        buildLine('Versão do SQL Server', recommendations.sqlServerVersionMinimo),
-        buildLine('Armazenamento', recommendations.armazenamento)
-    ].filter(line => line !== '');
-
-    if (minLines.length > 0) {
-        resultMappingParts.push(`<h5 style="margin-bottom:8px;">Ambiente Mínimo</h5><ul style="margin-top:0;">${minLines.join('')}</ul>`);
-    }
-
-    // Ambiente Recomendado
-    let recLines = [
-        buildLine('Tipo de Servidor', recommendations.tipoServidor),
-        buildLine('Quantidade de vCPU', recommendations.vCPURecomendado),
-        buildLine('Memória RAM Total', recommendations.memoriaRamTotalRecomendado),
-        buildLine('Versão do SQL Server', recommendations.sqlServerVersionRecomendado),
-        buildLine('Armazenamento', recommendations.armazenamento)
-    ].filter(line => line !== '');
-
-    if (recLines.length > 0) {
-        resultMappingParts.push(`<h5 style="margin-bottom:8px;">Ambiente Recomendado</h5><ul style="margin-top:0;">${recLines.join('')}</ul>`);
-    }
-
-    if (resultMappingParts.length > 0) {
-        reportParts.push(`<h5 style="margin-bottom:8px;">Resultado do Mapeamento</h5>${resultMappingParts.join('')}`);
-    }
-
-    // Observações
-    reportParts.push(
-        `<h5 style="margin-bottom:8px;">Observações</h5><ul style="margin-top:0;">${
-            !isNA(recommendations.observacoes)
-                ? recommendations.observacoes.split('\n').map(obs => `<li>${obs}</li>`).join('')
-                : '<li>Nenhuma observação.</li>'
-        }</ul>`
-    );
+        if (packageLines.length > 0) {
+            reportParts.push(`<h5 style="margin-bottom:8px;">Resultado do Mapeamento (Pacote)</h5><ul style="margin-top:0;">${packageLines.join('')}</ul>`);
+        }
+        
+        // --- Exibição Condicional para Dedicado ---
+        if (rec.isDedicated) {
+            let dedicatedLinesMin = [
+                buildLine('Quantidade de vCPU', rec.serverSpecs.vCPUMinimo),
+                buildLine('Memória RAM Total', rec.serverSpecs.memoriaRamTotalMinimo),
+                buildLine('Versão do SQL Server', rec.serverSpecs.sqlServerVersionMinimo),
+                buildLine('Armazenamento', rec.serverSpecs.armazenamento)
+            ].filter(line => line !== '');
+            
+            let dedicatedLinesRec = [
+                buildLine('Quantidade de vCPU', rec.serverSpecs.vCPURecomendado),
+                buildLine('Memória RAM Total', rec.serverSpecs.memoriaRamTotalRecomendado),
+                buildLine('Versão do SQL Server', rec.serverSpecs.sqlServerVersionRecomendado),
+                buildLine('Armazenamento', rec.serverSpecs.armazenamento)
+            ].filter(line => line !== '');
+            
+            if (dedicatedLinesMin.length > 0 || dedicatedLinesRec.length > 0) {
+                reportParts.push('<hr style="margin: 24px 0;">');
+                reportParts.push(`<h5 style="margin-bottom:8px;">Dimensionamento Mínimo do Servidor Dedicado</h5><ul style="margin-top:0;">${dedicatedLinesMin.join('')}</ul>`);
+                reportParts.push(`<h5 style="margin-bottom:8px;">Dimensionamento Recomendado do Servidor Dedicado</h5><ul style="margin-top:0;">${dedicatedLinesRec.join('')}</ul>`);
+            }
+        }
 
     // ## Dados do Cliente e Empresas
     let clientDataLines = [
-        buildLine('Informações do Cliente', data.clienteInfo),
+        buildLine('Codigo do Cliente', data.clienteInfo),
+		buildLine('CPF/CNPJ', data.clienteCPFCNPJ),
         buildLine('Empresas Ativas', data.empAtivas),
         buildLine('Empresas Inativas', data.empInativas),
+		buildLine('empLucroPresumido', data.empLucroPresumido),
+		buildLine('empLucroReal', empLucroReal),
         buildLine('Total de Empresas', data.empTotal),
         buildLine('Maior Quadro de Funcionários', data.funcionariosEmpresaMaior),
         buildLine('Total de Funcionários da Base', data.funcionariosEmpresaTotal),
         buildLine('Média XML Mensal', data.mediaXMLmensal),
-        buildLine('Média XML Mensal (Varejista)', data.mediaXMLmensalVarejista),
         buildLine('Maior Banco de Dados', (data.sqlMaiorBancoBaseMB / 1024).toFixed(2), ' GB'),
 		buildLine('Nome do Maior Banco de Dados', data.NomesqlMaiorBancoBaseMB),
         buildLine('Tamanho Total da Base', (data.sqlTotalBancoBaseMB / 1024).toFixed(2), ' GB')
@@ -640,17 +497,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // ## Dados do Ambiente
     let envDataLines = [
         buildLine('Versão do Windows', data.windowsVersion),
-        buildLine('Versão do SQL Server', data.sqlVersion),
-        buildLine('Nome do Processador', data.processorName),
-        buildLine('Número de Cores/Núcleos', data.coreCount),
-        buildLine('RAM Total', (data.totalRamGB / 1024).toFixed(2), ' GB'),
-        buildLine('RAM Alocada para SQL Server', data.sqlRamDisplay),
         buildLine('Tipo de Conexão', data.connectionType),
-        buildLine('Velocidade de Leitura de Disco', data.diskReadSpeedMBps, ' MB/s'),
-        buildLine('Velocidade de Escrita de Disco', data.diskWriteSpeedMBps, ' MB/s'),
-        buildLine('Tipo de Disco', data.diskType),
-        buildLine('Tamanho Total do Disco', (data.diskTotalGB / 1024).toFixed(2), ' GB'),
-        buildLine('Pontuação CPU Multi-core', data.cpuMultiCoreScore),
         buildLine('Velocidade de Upload (Aproximado)', data.internetUploadSpeedMbps, ' Mbps'),
         buildLine('Velocidade de Download (Aproximado)', data.internetDownloadSpeedMbps, ' Mbps')
     ].filter(line => line !== '');
