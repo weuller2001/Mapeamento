@@ -213,6 +213,19 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 	*/
 
+	// --- FUNÇÃO AUXILIAR DE ARREDONDAMENTO ---
+	// Converte MB para GB e arredonda para o próximo número PAR de GB
+	function roundUpToNextEvenGB(valueMB) {
+		const valueGB = valueMB / 1024; // Converte MB para GB
+		const roundedValue = Math.ceil(valueGB); // Arredonda para o próximo inteiro
+		
+		// Retorna o valor, garantindo que seja par. Se for 9, retorna 10. Se for 8, retorna 8.
+		if (roundedValue % 2 !== 0) {
+			return (roundedValue + 1) + ' GB'; // Se for ímpar, soma 1 para torná-lo par
+		}
+		return roundedValue + ' GB'; // Se for par, retorna ele mesmo
+	}
+	
     // --- calculateRecommendations MODIFICADA com Lógica de Dimensionamento Dedicado ---
     function calculateRecommendations(data) {
         // --- Definição dos Pacotes ---
