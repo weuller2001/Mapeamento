@@ -270,8 +270,7 @@ document.addEventListener('DOMContentLoaded', function() {
             buildLine('Total de Funcionários da Base', data.funcionariosEmpresaTotal),
             buildLine('Média XML Mensal', data.mediaXMLmensal),
             // Exibe exatamente como veio da URL/C#
-            buildLine('Maior Banco de Dados', data.sqlMaiorBancoBaseMB, ' GB'),
-            buildLine('Nome do Maior Banco de Dados', data.NomesqlMaiorBancoBaseMB),
+            buildLine('Maior Banco de Dados', data.NomesqlMaiorBancoBaseMB, data.sqlMaiorBancoBaseMB, ' GB'),
             buildLine('Tamanho Total da Base', data.sqlTotalBancoBaseMB, ' GB')
         ].filter(line => line !== '');
 
