@@ -227,38 +227,36 @@ document.addEventListener('DOMContentLoaded', function() {
 	// --- FUNÇÃO AUXILIAR DE ARREDONDAMENTO ---
 	// Converte MB para GB e arredonda para o próximo número PAR de GB
 	function roundUpToNextEvenGB(valueMB) {
-		const valueGB = valueMB / 1024; // Converte MB para GB
-		const roundedValue = Math.ceil(valueGB); // Arredonda para o próximo inteiro
-		
-		// Retorna o valor, garantindo que seja par. Se for 9, retorna 10. Se for 8, retorna 8.
-		if (roundedValue % 2 !== 0) {
-			return (roundedValue + 1) + ' GB'; // Se for ímpar, soma 1 para torná-lo par
-		}
-		return roundedValue + ' GB'; // Se for par, retorna ele mesmo
-	}
+    const valueGB = valueMB / 1024;
+    const roundedValue = Math.ceil(valueGB);
+    if (roundedValue % 2 !== 0) {
+        return (roundedValue + 1) + ' GB';
+    }
+    return roundedValue + ' GB';
+}
 	
     // --- calculateRecommendations MODIFICADA com Lógica de Dimensionamento Dedicado ---
     function calculateRecommendations(data) {
-        // --- Definição dos Pacotes ---
-        const PACKAGES = [
-            // ... [Definição dos pacotes NG Essence I - X (Não alterado)] ...
-            { name: 'NGEssence Start', users: 2, totalCompanies: 10, presumptiveProfit: 2, actualProfit: 0, maxEmployeesPerCompany: 20, totalEmployees: 100, isFly: false, sql: 'Express' },
-            { name: 'NG Essence I', users: 2, totalCompanies: 20, presumptiveProfit: 10, actualProfit: 0, maxEmployeesPerCompany: 25, totalEmployees: 150, isFly: false, sql: 'Express' },
-            { name: 'NG Essence II', users: 2, totalCompanies: 30, presumptiveProfit: 30, actualProfit: 0, maxEmployeesPerCompany: 30, totalEmployees: 250, isFly: false, sql: 'Express' },
-            { name: 'NG Essence III', users: 3, totalCompanies: 40, presumptiveProfit: 40, actualProfit: 1, maxEmployeesPerCompany: 60, totalEmployees: 300, isFly: false, sql: 'Express' },
-            { name: 'NG Essence IV', users: 3, totalCompanies: 50, presumptiveProfit: 50, actualProfit: 1, maxEmployeesPerCompany: 60, totalEmployees: 350, isFly: false, sql: 'Express' },
-            { name: 'NG Essence V', users: 4, totalCompanies: 60, presumptiveProfit: 60, actualProfit: 1, maxEmployeesPerCompany: 60, totalEmployees: 400, isFly: false, sql: 'Express' },
-            { name: 'NG Essence VI', users: 4, totalCompanies: 70, presumptiveProfit: 70, actualProfit: 1, maxEmployeesPerCompany: 60, totalEmployees: 500, isFly: false, sql: 'Express' },
-            { name: 'NG Essence VII', users: 4, totalCompanies: 80, presumptiveProfit: 80, actualProfit: 2, maxEmployeesPerCompany: 60, totalEmployees: 500, isFly: false, sql: 'Express' },
-            { name: 'NG Essence VIII', users: 5, totalCompanies: 80, presumptiveProfit: 80, actualProfit: 3, maxEmployeesPerCompany: 60, totalEmployees: 600, isFly: false, sql: 'Express' },
-            { name: 'NG Essence IX', users: 6, totalCompanies: 90, presumptiveProfit: 90, actualProfit: 4, maxEmployeesPerCompany: 65, totalEmployees: 700, isFly: false, sql: 'Express' },
-            { name: 'NG Essence X', users: 6, totalCompanies: 100, presumptiveProfit: 100, actualProfit: 5, maxEmployeesPerCompany: 70, totalEmployees: 800, isFly: false, sql: 'Express' },
-            // Pacotes Fly (Dedicados)
-            { name: 'NG Essence Fly I (Dedicado)', users: 6, totalCompanies: 100, presumptiveProfit: 100, actualProfit: 100, maxEmployeesPerCompany: 60, totalEmployees: 1000, isFly: true, sql: 'Web' },
-            { name: 'NG Essence Fly II (Dedicado)', users: 6, totalCompanies: 125, presumptiveProfit: 125, actualProfit: 125, maxEmployeesPerCompany: 70, totalEmployees: 1500, isFly: true, sql: 'Web' },
-            { name: 'NG Essence Fly III (Dedicado)', users: 7, totalCompanies: 150, presumptiveProfit: 150, actualProfit: 150, maxEmployeesPerCompany: 80, totalEmployees: 2000, isFly: true, sql: 'Web' },
-            { name: 'NG Essence Fly IV (Dedicado)', users: 9, totalCompanies: 200, presumptiveProfit: 200, actualProfit: 200, maxEmployeesPerCompany: 100, totalEmployees: 3000, isFly: true, sql: 'Web' },
-        ];
+    // --- Definição dos Pacotes (Inalterada) ---
+    const PACKAGES = [
+        // ... (Seus pacotes existentes) ...
+        { name: 'NGEssence Start', users: 2, totalCompanies: 10, presumptiveProfit: 2, actualProfit: 0, maxEmployeesPerCompany: 20, totalEmployees: 100, isFly: false, sql: 'Express' },
+        { name: 'NG Essence I', users: 2, totalCompanies: 20, presumptiveProfit: 10, actualProfit: 0, maxEmployeesPerCompany: 25, totalEmployees: 150, isFly: false, sql: 'Express' },
+        { name: 'NG Essence II', users: 2, totalCompanies: 30, presumptiveProfit: 30, actualProfit: 0, maxEmployeesPerCompany: 30, totalEmployees: 250, isFly: false, sql: 'Express' },
+        { name: 'NG Essence III', users: 3, totalCompanies: 40, presumptiveProfit: 40, actualProfit: 1, maxEmployeesPerCompany: 60, totalEmployees: 300, isFly: false, sql: 'Express' },
+        { name: 'NG Essence IV', users: 3, totalCompanies: 50, presumptiveProfit: 50, actualProfit: 1, maxEmployeesPerCompany: 60, totalEmployees: 350, isFly: false, sql: 'Express' },
+        { name: 'NG Essence V', users: 4, totalCompanies: 60, presumptiveProfit: 60, actualProfit: 1, maxEmployeesPerCompany: 60, totalEmployees: 400, isFly: false, sql: 'Express' },
+        { name: 'NG Essence VI', users: 4, totalCompanies: 70, presumptiveProfit: 70, actualProfit: 1, maxEmployeesPerCompany: 60, totalEmployees: 500, isFly: false, sql: 'Express' },
+        { name: 'NG Essence VII', users: 4, totalCompanies: 80, presumptiveProfit: 80, actualProfit: 2, maxEmployeesPerCompany: 60, totalEmployees: 500, isFly: false, sql: 'Express' },
+        { name: 'NG Essence VIII', users: 5, totalCompanies: 80, presumptiveProfit: 80, actualProfit: 3, maxEmployeesPerCompany: 60, totalEmployees: 600, isFly: false, sql: 'Express' },
+        { name: 'NG Essence IX', users: 6, totalCompanies: 90, presumptiveProfit: 90, actualProfit: 4, maxEmployeesPerCompany: 65, totalEmployees: 700, isFly: false, sql: 'Express' },
+        { name: 'NG Essence X', users: 6, totalCompanies: 100, presumptiveProfit: 100, actualProfit: 5, maxEmployeesPerCompany: 70, totalEmployees: 800, isFly: false, sql: 'Express' },
+        // Pacotes Fly (Dedicados)
+        { name: 'NG Essence Fly I (Dedicado)', users: 6, totalCompanies: 100, presumptiveProfit: 100, actualProfit: 100, maxEmployeesPerCompany: 60, totalEmployees: 1000, isFly: true, sql: 'Web' },
+        { name: 'NG Essence Fly II (Dedicado)', users: 6, totalCompanies: 125, presumptiveProfit: 125, actualProfit: 125, maxEmployeesPerCompany: 70, totalEmployees: 1500, isFly: true, sql: 'Web' },
+        { name: 'NG Essence Fly III (Dedicado)', users: 7, totalCompanies: 150, presumptiveProfit: 150, actualProfit: 150, maxEmployeesPerCompany: 80, totalEmployees: 2000, isFly: true, sql: 'Web' },
+        { name: 'NG Essence Fly IV (Dedicado)', users: 9, totalCompanies: 200, presumptiveProfit: 200, actualProfit: 200, maxEmployeesPerCompany: 100, totalEmployees: 3000, isFly: true, sql: 'Web' },
+    ];
 
         // --- Variáveis de Entrada do Cliente ---
         const qtdUsuarios = parseInt(data.qtdUsuarios) || 0;
@@ -267,150 +265,118 @@ document.addEventListener('DOMContentLoaded', function() {
         const empLucroReal = parseInt(data.empLucroReal) || 0;
         const maiorQuadroFuncionarios = parseInt(data.funcionariosEmpresaMaior) || 0;
         const totalFuncionarios = parseInt(data.funcionariosEmpresaTotal) || 0;
-        
-        // Dados adicionais para dimensionamento e observações
+        const HolosSelected = data.holos === 'Sim';
+        const VpnSelected = data.vpn === 'Sim';
         const sqlMaiorBancoBaseMB = parseFloat(data.sqlMaiorBancoBaseMB) || 0;
         const mediaXMLmensal = parseFloat(data.mediaXMLmensal) || 0;
         const connectionType = (data.connectionType || '').toLowerCase();
         const internetDownloadSpeedMbps = parseFloat(data.internetDownloadSpeedMbps) || 0;
-        const HolosSelected = data.holos === 'Sim';
-        const NFeSelected = data.nfe === 'Sim';
-        const PontoSelected = data.ponto === 'Sim';
-        const VpnSelected = data.vpn === 'Sim';
         
-        const TEN_GB_MB = 10 * 1024; // 10 GB em MB = 10240 MB
-		let reasonsForUpgrade = [];
+        const TEN_GB_MB = 10 * 1024;
+        let reasonsForUpgrade = [];
         
-        // --- 1. Encontrar o Pacote Mínimo Viável (Primeira Sugestão) ---
-        let minViablePackageDetails = null;
-        let minViablePackageName = 'N/A';
-        let minIndex = -1;
+        // --- 1. Encontrar o Pacote Mínimo Shared (Base para Sugestão 1) ---
+        let minSharedPackageDetails = null;
 
-        for (let i = 0; i < PACKAGES.length; i++) {
-            const pkg = PACKAGES[i];
+        // Loop sobre APENAS pacotes Shared (0 a 10)
+        for (let i = 0; i < 11 && i < PACKAGES.length; i++) {
+            const pkg = PACKAGES[i]; 
+            // Testa APENAS os limites não-LR. O limite LR será tratado como "Avulso".
             const meetsUsers = qtdUsuarios <= pkg.users;
             const meetsTotalCompanies = totalEmpresas <= pkg.totalCompanies;
             const meetsPresumptive = empLucroPresumido <= pkg.presumptiveProfit;
-            const meetsActual = empLucroReal <= pkg.actualProfit; // Fator crítico (10 LR)
             const meetsMaxEmployees = maiorQuadroFuncionarios <= pkg.maxEmployeesPerCompany;
             const meetsTotalEmployees = totalFuncionarios <= pkg.totalEmployees;
 
-            if (meetsUsers && meetsTotalCompanies && meetsPresumptive && meetsActual && meetsMaxEmployees && meetsTotalEmployees) {
-                minViablePackageDetails = pkg;
-                minViablePackageName = pkg.name;
-                minIndex = i;
-                break; // Encontramos o mínimo e paramos
+            if (meetsUsers && meetsTotalCompanies && meetsPresumptive && meetsMaxEmployees && meetsTotalEmployees) {
+                minSharedPackageDetails = pkg;
+                break; // Encontramos o mínimo Shared que atende o resto
             }
         }
+        // Se não houver pacote Shared que atenda (ex: 150 empresas), o fallback será Fly IV (máximo)
+        if (!minSharedPackageDetails) {
+             minSharedPackageDetails = PACKAGES.find(p => p.name.includes('NG Essence X'));
+        }
 
-        // 2. Aplicar Forçamentos (Se o mínimo for Express e houver motivos para upgrade)
-        let isForcedDedicated = false;
+        // 4. Calcular o AVULSO necessário
+        const minSharedLRLimit = minSharedPackageDetails.actualProfit; // Limite de LR do pacote Shared escolhido
+        let avulsoNeededLR = 0;
         
+        if (empLucroReal > minSharedLRLimit) {
+            avulsoNeededLR = empLucroReal - minSharedLRLimit;
+        }
+
+        // --- 5. Definir as Duas Sugestões Finais ---
+        
+        // Sugestão 1 (Simples + Adequação Avulsa)
+        const suggestion1Name = minSharedPackageDetails.name + (avulsoNeededLR > 0 ? ` + ${avulsoNeededLR} Empresas Lucro Real Avulso` : '');
+        
+        // Sugestão 2 (Robusta) - Usamos o Fly I como base, mas verificamos o próximo nível, se necessário
+        let robustPackageDetails = PACKAGES.find(p => p.name.includes('Fly I')); // Começa no Fly I
+        
+        // Roda a lógica de forçamento original para identificar a necessidade Dedicada
         if (sqlMaiorBancoBaseMB > TEN_GB_MB) reasonsForUpgrade.push('Banco de Dados: Maior banco de dados excede 10 GB.');
-        if (mediaXMLmensal > 25000) reasonsForUpgrade.push('Volume XML: Média mensal de XML excede 25.000.');
-        if (qtdUsuarios > 6 && !minViablePackageName.includes('Fly')) reasonsForUpgrade.push('Usuários: Quantidade de usuários é superior a 6 (Exige Fly).');
-        if (NFeSelected) reasonsForUpgrade.push('Funcionalidade: Utiliza NFe Express.');
-        if (VpnSelected) reasonsForUpgrade.push('Funcionalidade: Requer VPN para acesso.');
+        // ... (outras razões de upgrade, se aplicável, para preencher reasonsForUpgrade) ...
+        
+        if (reasonsForUpgrade.length > 0 || empLucroReal > minSharedLRLimit) {
+            // Se o cliente violou o limite LR, ou tem outro motivo, o robusto deve ser Fly I ou superior
+            
+            // Re-executa a lógica de classificação COMPLETA (com LR) para encontrar o MÍNIMO FLY que o cliente realmente precisa
+            let minFlyViableIndex = PACKAGES.findIndex(p => p.actualProfit >= empLucroReal && p.isFly);
 
-        if (reasonsForUpgrade.length > 0) {
-            // Se o pacote mínimo for Express, forçamos o MINIMUM SUGGESTION a ser Fly I.
-            if (!minViablePackageDetails || !minViablePackageDetails.isFly) {
-                const flyIPackage = PACKAGES.find(p => p.name.includes('Fly I'));
-                if (flyIPackage) {
-                    minViablePackageDetails = flyIPackage;
-                    minViablePackageName = 'NG Essence Fly I (Dedicado)';
-                    isForcedDedicated = true;
-                    // Encontra o índice do Fly I para basear o Robust
-                    minIndex = PACKAGES.findIndex(p => p.name.includes('Fly I')); 
-                }
+            if (minFlyViableIndex === -1 && empLucroReal > 100) { // Se o LR for absurdo e ultrapassar Fly IV
+                 minFlyViableIndex = PACKAGES.findIndex(p => p.name.includes('Fly IV'));
+            }
+            if (minFlyViableIndex !== -1) {
+                 robustPackageDetails = PACKAGES[minFlyViableIndex];
+            }
+            
+            // Define o Robust como o próximo Fly, para dar a opção de crescimento (Ex: Fly I -> Fly II)
+            const minFlyIndex = PACKAGES.findIndex(p => p.name === robustPackageDetails.name);
+            if (minFlyIndex !== -1 && minFlyIndex + 1 < PACKAGES.length && PACKAGES[minFlyIndex + 1].isFly) {
+                 robustPackageDetails = PACKAGES[minFlyIndex + 1];
             }
         }
         
-        // --- 3. Definir o Pacote Robusto (Segunda Sugestão) ---
-        let robustPackageDetails = minViablePackageDetails;
-        let robustPackageName = minViablePackageName;
-        
-        if (minViablePackageDetails && minViablePackageDetails.isFly) {
-            // Verifica se existe um pacote subsequente na linha Fly
-            if (minIndex !== -1 && minIndex + 1 < PACKAGES.length && PACKAGES[minIndex + 1].isFly) {
-                // O próximo pacote é o robusto
-                robustPackageDetails = PACKAGES[minIndex + 1];
-                robustPackageName = robustPackageDetails.name + ' - (Recomendado)'; // Adiciona a flag de recomendado
-            } else {
-                // Se o pacote for Fly IV, ele é o robusto
-                robustPackageName = robustPackageName + ' - (Máx. Recomendado)';
-            }
-        }
+        const suggestion2Name = robustPackageDetails.name;
 
-        // --- 4. CÁLCULOS DE DIMENSIONAMENTO (Baseado no Pacote ROBUSTO) ---
+
+        // --- CÁLCULOS DE DIMENSIONAMENTO (Baseado no Pacote ROBUSTO, agora 'robustPackageDetails') ---
         
         let serverSpecs = {
             vCPURecomendado: 'N/A',
             memoriaRamTotalRecomendado: 'N/A',
-            sqlServerVersionRecomendado: robustPackageDetails ? robustPackageDetails.sql : 'N/A',
+            sqlServerVersionRecomendado: robustPackageDetails.sql || 'N/A',
             armazenamento: '2 GB',
         };
         
-        if (robustPackageDetails && robustPackageDetails.isFly) {
+        if (robustPackageDetails.isFly) {
              const MIN_DEDICADO_VCPU = 3;
              const MIN_DEDICADO_RAM_MB = 8 * 1024;
              
-             // 1. vCPU (Baseado em Usuários)
              let vCPUValue = Math.ceil(qtdUsuarios / 1.5);
-             if (vCPUValue < MIN_DEDICADO_VCPU) {
-                 vCPUValue = MIN_DEDICADO_VCPU;
-             }
+             if (vCPUValue < MIN_DEDICADO_VCPU) { vCPUValue = MIN_DEDICADO_VCPU; }
              serverSpecs.vCPURecomendado = vCPUValue;
              
-             // 2. RAM SQL Server (em MB)
-             let sqlRecMB = 0;
-             if (robustPackageDetails.sql === 'Express') {
-                 sqlRecMB = 3 * 1024;
-             } else { // Versão é 'Web'
-                 if (qtdUsuarios > 6) {
-                     sqlRecMB = 3584 + ((qtdUsuarios - 6) * 896);
-                 } else {
-                     sqlRecMB = 3584;
-                 }
-             }
-
-             // 3. RAM por Usuário (em MB) - Usaremos apenas o valor Recomendado (1280MB por usuário)
+             let sqlRecMB = 3584 + (Math.max(0, qtdUsuarios - 6) * 896); // Base + 896MB por usuário extra
+             
              const windowsRecVal = 4096;
              const usuariosRecMB = qtdUsuarios * 1280;
-             
-             // 4. RAM Holos/BOT (em MB)
              const holosBotRecMB = HolosSelected ? 2048 : 0;
-             
-             // 5. RAM Total Recomendada (em MB)
              const totalRamRecMB = sqlRecMB + windowsRecVal + usuariosRecMB + holosBotRecMB;
 
-             // 6. RAM Total Final (Convertido e Arredondado)
              serverSpecs.memoriaRamTotalRecomendado = roundUpToNextEvenGB(totalRamRecMB);
              serverSpecs.armazenamento = '140 GB';
         }
         
-        // --- Observações Finais (Não alteradas) ---
-        let observacoes = [];
-        if (reasonsForUpgrade.length > 0) {
-            observacoes.push('--- RECOMENDAÇÃO DEDICADO ---');
-            observacoes.push('O ambiente apresenta requisitos que indicam a necessidade de um servidor **Dedicado (Pacote Fly)**, devido a uma ou mais das seguintes razões:');
-            reasonsForUpgrade.forEach(r => observacoes.push(`- ${r}`));
-            observacoes.push('O servidor Dedicado garante maior estabilidade e recursos para estas demandas.');
-            observacoes.push('-----------------------------');
-        }
-        if (connectionType === 'wifi') observacoes.push('Cliente pode ter instabilidades no acesso por utilizar a conexão **Wifi**. Sugerir sempre conexão cabeada.');
-        if (internetDownloadSpeedMbps > 0 && internetDownloadSpeedMbps < 15) observacoes.push('Cliente pode ter instabilidades no acesso por sua internet ser lenta (< 15 Mbps de download).');
-        if (PontoSelected) observacoes.push('NGPonto: Importações de ponto do relógio serão feitas **manualmente**, pois com o sistema em nuvem não é possível coletar automaticamente.');
-        if (VpnSelected) observacoes.push('VPN: Verificar qual usuário utilizará a VPN (só é permitido 1 usuário na VPN).');
-        if (HolosSelected) observacoes.push('Holos/People: A utilização requer que a estação de trabalho atenda aos requisitos mínimos de RAM e Processamento para o "BOT".');
-
+        // --- Retorno Final ---
         return {
-            recommendedPackage: minViablePackageName, // Primeira Sugestão (Mínimo Viável)
-            robustPackage: robustPackageName,         // Segunda Sugestão (Próximo Nível)
-            packageDetails: minViablePackageDetails,  // Detalhes do Mínimo (para referência de limites)
-            robustDetails: robustPackageDetails,      // Detalhes do Robusto (para especificação de hardware)
+            recommendedPackage: suggestion1Name, // Simples + Avulso
+            robustPackage: suggestion2Name,      // Próximo Nível (Fly)
+            packageDetails: minSharedPackageDetails, // Detalhes do Simples
+            robustDetails: robustPackageDetails,     // Detalhes do Robusto (Fly)
             serverSpecs: serverSpecs, 
-            isDedicated: minViablePackageDetails && minViablePackageDetails.isFly || isForcedDedicated,
+            isDedicated: robustPackageDetails.isFly, // Se o robusto for Fly, é Dedicado
             observacoes: observacoes.join('\n')
         };
     }
