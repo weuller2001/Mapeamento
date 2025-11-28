@@ -437,7 +437,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			// Converte MB para GB para exibição
 			buildLine('Maior Banco de Dados', data.sqlMaiorBancoBaseMB, ' GB'),
 			buildLine('Nome do Maior Banco de Dados', data.NomesqlMaiorBancoBaseMB),
-			buildLine('Tamanho Total da Base', data.sqlTotalBancoBaseMB), ' GB')
+			buildLine('Tamanho Total da Base', data.sqlTotalBancoBaseMB, ' GB')
 		].filter(line => line !== '');
 
 		if (clientDataLines.length > 0) {
