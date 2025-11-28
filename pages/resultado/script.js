@@ -435,9 +435,9 @@ document.addEventListener('DOMContentLoaded', function() {
 			buildLine('Total de Funcionários da Base', data.funcionariosEmpresaTotal),
 			buildLine('Média XML Mensal', data.mediaXMLmensal),
 			// Converte MB para GB para exibição
-			buildLine('Maior Banco de Dados', (data.sqlMaiorBancoBaseMB / 1024).toFixed(2), ' GB'),
+			buildLine('Maior Banco de Dados', data.sqlMaiorBancoBaseMB, ' GB'),
 			buildLine('Nome do Maior Banco de Dados', data.NomesqlMaiorBancoBaseMB),
-			buildLine('Tamanho Total da Base', (data.sqlTotalBancoBaseMB / 1024).toFixed(2), ' GB')
+			buildLine('Tamanho Total da Base', data.sqlTotalBancoBaseMB), ' GB')
 		].filter(line => line !== '');
 
 		if (clientDataLines.length > 0) {
