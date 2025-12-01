@@ -137,6 +137,7 @@ document.addEventListener('DOMContentLoaded', function() {
             ponto: getRadioValue('ponto'),
             holos: getRadioValue('holos'),
             vpn: getRadioValue('vpn'),
+			dos: getRadioValue('dos'),
             qtdUsuarios: parseInt(document.getElementById('qtdUsuarios')?.value.trim()) || 0
         };
     }
@@ -149,6 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!mappingData.ponto) missingFields.push('NGPonto');
         if (!mappingData.holos) missingFields.push('Holos/People');
         if (!mappingData.vpn) missingFields.push('VPN');
+		if (!mappingData.dos) missingFields.push('DOS');
         if (mappingData.qtdUsuarios === 0) missingFields.push('Quantidade de Usuários');
 
         if (missingFields.length > 0) {
@@ -223,6 +225,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (internetDownloadSpeedMbps > 0 && internetDownloadSpeedMbps < 15) specs.observacoes.push('Alerta: Internet lenta (< 15 Mbps).');
         if (data.ponto === 'Sim') specs.observacoes.push('NGPonto: Importações de ponto serão manuais.');
         if (data.vpn === 'Sim') specs.observacoes.push('VPN: Permitido apenas 1 usuário.');
+		if (data.dos === 'Sim') specs.observacoes.push('Cliente deve passar por conversão dos dados do MFolha para o NGFolha antes de ter o cloud ativado.');
         if (HolosSelected) specs.observacoes.push('Holos/People: Requer recursos adicionais para o BOT (já calculados na RAM).');
 
         return specs;
@@ -284,6 +287,7 @@ document.addEventListener('DOMContentLoaded', function() {
             buildLine('Utiliza NGPonto', data.ponto),
             buildLine('Utiliza Holos/People', data.holos),
             buildLine('Precisa de VPN', data.vpn),
+			buildLine('Utiliza MFolha', data.dos),
             buildLine('Quantidade de Usuários para acesso', data.qtdUsuarios)
         ].filter(line => line !== '');
 
