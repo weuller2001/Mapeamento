@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!mappingData.ponto) missingFields.push('NGPonto');
         if (!mappingData.holos) missingFields.push('Holos/People');
         if (!mappingData.vpn) missingFields.push('VPN');
-		if (!mappingData.dos) missingFields.push('DOS');
+		if (!mappingData.dos) missingFields.push('Utiliza MFolha');
         if (mappingData.qtdUsuarios === 0) missingFields.push('Quantidade de Usuários');
 
         if (missingFields.length > 0) {
