@@ -309,9 +309,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // --- 5. Observações ---
         if (specs.observacoes && specs.observacoes.length > 0) {
-             reportParts.push(`<h5 style="margin-bottom:8px;">Observações e Alertas</h5><p style="white-space: pre-wrap; font-family: monospace; background-color: #fdd; padding: 10px; border-radius: 5px;">${specs.observacoes.join('\n')}</p>`);
-        }
+        reportParts.push(`<h5 style="margin-bottom:8px;">Observações e Alertas</h5>`);
 
-        return reportParts.join('<hr style="margin: 24px 0;">');
+        let obsLines = specs.observacoes.map(obs => `<li>${obs}</li>`).join('');
+        
+        reportParts.push(`<ul style="margin-top:0;">${obsLines}</ul>`);
+    }
+
+    return reportParts.join('<hr style="margin: 24px 0;">');
     }
 });
