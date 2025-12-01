@@ -222,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const internetDownloadSpeedMbps = parseFloat(data.internetDownloadSpeedMbps) || 0;
 
         if (connectionType === 'wifi') specs.observacoes.push('Alerta: Conexão Wi-Fi detectada. Sugerir cabeada.');
-        if (internetDownloadSpeedMbps > 0 && internetDownloadSpeedMbps < 15) specs.observacoes.push('Alerta: Internet lenta (< 15 Mbps).');
+        if (internetDownloadSpeedMbps > 0 && internetDownloadSpeedMbps < 15) specs.observacoes.push('Alerta: Internet lenta (menor que 15 Mbps).');
         if (data.ponto === 'Sim') specs.observacoes.push('NGPonto: Importações de ponto serão manuais.');
         if (data.vpn === 'Sim') specs.observacoes.push('VPN: Permitido apenas 1 usuário.');
 		if (data.dos === 'Sim') specs.observacoes.push('Cliente deve passar por conversão dos dados do MFolha para o NGFolha antes de ter o cloud ativado.');
