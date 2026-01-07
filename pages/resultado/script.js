@@ -307,7 +307,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 		
 		// --- SUGESTÃO DE AMBIENTE DEDICADO ---
-        reportParts.push(`<h5 style="margin-bottom:8px;">Caso o vendedor opte por ambiente dedicado, ele deve respeitar as seguintes configurações:</h5>`);
         
         let dedicatedLines = [
             buildLine('Quantidade de vCPU', specs.vCPU),
@@ -315,9 +314,12 @@ document.addEventListener('DOMContentLoaded', function() {
             buildLine('Versão do SQL Server', specs.sqlVersion),
             buildLine('Armazenamento', specs.armazenamento)
         ];
-        reportParts.push(`<ul style="margin-top:0;">${dedicatedLines.join('')}</ul>`);
+        let dedicatedBlock = `
+            <h5 style="margin-bottom:8px;">Caso o vendedor opte por ambiente dedicado, ele deve respeitar as seguintes configurações:</h5>
+            <ul style="margin-top:0;">${dedicatedLines.join('')}</ul>
+        `;
 
-        
+        reportParts.push(dedicatedBlock);
 
     return reportParts.join('<hr style="margin: 24px 0;">');
     }
