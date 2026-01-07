@@ -249,18 +249,21 @@ document.addEventListener('DOMContentLoaded', function() {
         // --- Título ---
         //reportParts.push(`<h5>Relatório de Mapeamento</h5>`);
 
-        // --- 1. SUGESTÃO DE AMBIENTE DEDICADO (NO TOPO) ---
-        reportParts.push(`<h5 style="margin-bottom:8px;">Caso o vendedor opte por ambiente dedicado, ele deve respeitar as seguintes configurações:</h5>`);
-        
-        let dedicatedLines = [
-            buildLine('Quantidade de vCPU', specs.vCPU),
-            buildLine('Memória RAM Total', specs.memoriaRAM),
-            buildLine('Versão do SQL Server', specs.sqlVersion),
-            buildLine('Armazenamento', specs.armazenamento)
-        ];
-        reportParts.push(`<ul style="margin-top:0;">${dedicatedLines.join('')}</ul>`);
+		// --- Parâmetros do Mapeamento ---
+        let mappingDataLines = [
+            buildLine('Possui NFe Express', data.nfe),
+            buildLine('Utiliza NGPonto', data.ponto),
+            buildLine('Utiliza Holos/People', data.holos),
+            buildLine('Precisa de VPN', data.vpn),
+			buildLine('Utiliza MFolha', data.dos),
+            buildLine('Quantidade de Usuários para acesso', data.qtdUsuarios)
+        ].filter(line => line !== '');
 
-        // --- 2. Dados Coletados da Base e Cliente ---
+        if (mappingDataLines.length > 0) {
+            reportParts.push(`<h5 style="margin-bottom:8px;">Parâmetros de Mapeamento</h5><ul style="margin-top:0;">${mappingDataLines.join('')}</ul>`);
+        }
+
+        // Dados Coletados da Base e Cliente ---
         let clientDataLines = [
             buildLine('Codigo do Cliente', data.clienteInfo),
             buildLine('CPF/CNPJ', data.clienteCPFCNPJ),
@@ -281,19 +284,6 @@ document.addEventListener('DOMContentLoaded', function() {
             reportParts.push(`<h5 style="margin-bottom:8px;">Dados Coletados da Base e Cliente</h5><ul style="margin-top:0;">${clientDataLines.join('')}</ul>`);
         }
 
-        // --- 3. Parâmetros do Mapeamento ---
-        let mappingDataLines = [
-            buildLine('Possui NFe Express', data.nfe),
-            buildLine('Utiliza NGPonto', data.ponto),
-            buildLine('Utiliza Holos/People', data.holos),
-            buildLine('Precisa de VPN', data.vpn),
-			buildLine('Utiliza MFolha', data.dos),
-            buildLine('Quantidade de Usuários para acesso', data.qtdUsuarios)
-        ].filter(line => line !== '');
-
-        if (mappingDataLines.length > 0) {
-            reportParts.push(`<h5 style="margin-bottom:8px;">Parâmetros de Mapeamento</h5><ul style="margin-top:0;">${mappingDataLines.join('')}</ul>`);
-        }
 
         // --- 4. Dados do Ambiente ---
         let envDataLines = [
@@ -306,8 +296,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (envDataLines.length > 0) {
             reportParts.push(`<h5 style="margin-bottom:8px;">Dados do Ambiente (SO, Hardware e SQL Server)</h5><ul style="margin-top:0;">${envDataLines.join('')}</ul>`);
         }
-
-        // --- 5. Observações ---
+		
+		// --- 5. Observações ---
         if (specs.observacoes && specs.observacoes.length > 0) {
         reportParts.push(`<h5 style="margin-bottom:8px;">Observações e Alertas</h5>`);
 
@@ -315,6 +305,19 @@ document.addEventListener('DOMContentLoaded', function() {
         
         reportParts.push(`<ul style="margin-top:0;">${obsLines}</ul>`);
     }
+		
+		// --- SUGESTÃO DE AMBIENTE DEDICADO ---
+        reportParts.push(`<h5 style="margin-bottom:8px;">Caso o vendedor opte por ambiente dedicado, ele deve respeitar as seguintes configurações:</h5>`);
+        
+        let dedicatedLines = [
+            buildLine('Quantidade de vCPU', specs.vCPU),
+            buildLine('Memória RAM Total', specs.memoriaRAM),
+            buildLine('Versão do SQL Server', specs.sqlVersion),
+            buildLine('Armazenamento', specs.armazenamento)
+        ];
+        reportParts.push(`<ul style="margin-top:0;">${dedicatedLines.join('')}</ul>`);
+
+        
 
     return reportParts.join('<hr style="margin: 24px 0;">');
     }
