@@ -94,8 +94,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 const reportText = generateReportText(finalReportData, specs);
                 
                 // Configuração de envio de email
-                const serviceID = 'service_o8pq2op';    
-                const templateID = 'template_m7nu82b';  
+                const serviceID = 'service_pzenqsd';    
+                const templateID = 'template_m581ymb';  
                 
                 const clienteInfoCompleto = finalReportData.clienteInfo || 'Cliente Não Informado';
                 const clienteCodigo = clienteInfoCompleto.match(/^\d+/)?.[0] || 'N/A';
@@ -171,7 +171,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function calculateDedicatedSpecs(data) {
         // Variáveis de Entrada
         const qtdUsuarios = parseInt(data.qtdUsuarios) || 0;
-        const HolosSelected = data.holos === 'Sim';
         
         // O valor vem em GB da URL, mas convertemos vírgula para ponto no fillElement (storedValue)
         // Ex: "8,22" vira 8.22
@@ -187,7 +186,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // 1. Cálculo de vCPU (Mínimo 3 para dedicado)
         const MIN_DEDICADO_VCPU = 3;
-        let vCPUValue = Math.ceil(qtdUsuarios / 1.5);
+        let vCPUValue = Math.ceil(qtdUsuarios / 1.8);
         if (vCPUValue < MIN_DEDICADO_VCPU) { 
             vCPUValue = MIN_DEDICADO_VCPU; 
         }
@@ -195,12 +194,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // 2. Cálculo de RAM
         // Bases em MB para cálculo
-        let sqlRecMB = 3584 + (Math.max(0, qtdUsuarios - 6) * 896); // Base SQL + Usuários Extras
-        const windowsRecVal = 4096;
-        const usuariosRecMB = qtdUsuarios * 1280;
-        const holosBotRecMB = HolosSelected ? 2048 : 0;
+        const windowsRecVal = 3072;
+        const usuariosRecMB = qtdUsuarios * 512;
+		const sqlRecMB = qtdUsuarios * 768;
         
-        let totalRamRecMB = sqlRecMB + windowsRecVal + usuariosRecMB + holosBotRecMB;
+        let totalRamRecMB = sqlRecMB + windowsRecVal + usuariosRecMB;
         
         // Mínimo de 8GB para dedicado
         if (totalRamRecMB < (8 * 1024)) {
@@ -208,13 +206,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         specs.memoriaRAM = roundUpToNextEvenGB(totalRamRecMB);
+		specs.memoriaSQL = Math.Max(0, totalRamRecMB - usuariosRecMB - windowsRecVal);
 
         // 3. Lógica da Versão do SQL Server
         // Se maior banco > 9GB, obrigatoriamente Web. Senão Express ou Web.
         if (sqlMaiorBancoBaseGB > 9) {
             specs.sqlVersion = 'Web';
         } else {
-            specs.sqlVersion = 'Express ou Web';
+            specs.sqlVersion = 'Express ou Web (pacote FLY possuí SQL Web)';
         }
 
         // 4. Observações
@@ -226,7 +225,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (data.ponto === 'Sim') specs.observacoes.push('NGPonto: Importações de ponto serão manuais.');
         if (data.vpn === 'Sim') specs.observacoes.push('VPN: Permitido apenas 1 usuário.');
 		if (data.dos === 'Sim') specs.observacoes.push('Cliente deve passar por conversão dos dados do MFolha para o NGFolha antes de ter o cloud ativado.');
-        if (HolosSelected) specs.observacoes.push('Holos/People: Requer recursos adicionais para o BOT (já calculados na RAM).');
 
         return specs;
     }
@@ -312,7 +310,10 @@ document.addEventListener('DOMContentLoaded', function() {
             buildLine('Quantidade de vCPU', specs.vCPU),
             buildLine('Memória RAM Total', specs.memoriaRAM),
             buildLine('Versão do SQL Server', specs.sqlVersion),
-            buildLine('Armazenamento', specs.armazenamento)
+            buildLine('Armazenamento', specs.armazenamento),
+			buildLine('Informação para TI'),
+			buildLine('Tamanho da Base de Dados', data.sqlTotalBancoBaseMB),
+			buildLine('Memória RAM destinada ao SQL Server', specs.memoriaSQL)
         ];
         let dedicatedBlock = `
             <h5 style="margin-bottom:8px;">Caso o vendedor opte por ambiente dedicado, ele deve respeitar as seguintes configurações:</h5>
